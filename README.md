@@ -1,11 +1,3 @@
-<style>
-h2,h1 { 
-   text-decoration: underline;
-   margin: 0;
-   border-bottom: none;
-}
-</style>
-
 <p align="center">
   <h1 align="center">MeetingCam</h1>
   <p align="center">&#x2728 Special effects for not so special meetings. &#x1F440</p>
@@ -16,6 +8,10 @@ h2,h1 {
     </br> This repo is <i>work in progess</i>. The current version is a command line tool for Linux.
 </p>
 <hr />
+
+
+https://github.com/nengelmann/MeetingCam/assets/120744129/ec2e608d-e785-4179-ba33-c692da05a95b
+
 
 ## Installation
 
