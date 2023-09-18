@@ -1,0 +1,7 @@
+opencv-python-headless
+openvino-dev
+pynput
+pyvirtualcam
+rich
+typer
+v4l2ctl
