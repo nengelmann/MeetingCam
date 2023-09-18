@@ -1,13 +1,4 @@
-<style>
-h2,h1 { 
-   text-decoration: underline;
-   margin: 0;
-   border-bottom: none;
-}
-</style>
-
-<p align="center">
-  <h1 align="center">MeetingCam</h1>
+<h1>MeetingCam</h1>
   <p align="center">&#x2728 Special effects for not so special meetings. &#x1F440</p>
 </p>
 <hr />
