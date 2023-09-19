@@ -52,4 +52,9 @@ sudo modprobe v4l2loopback devices=3 video_nr=8,9,10 card_label="webcam-1,webcam
 
 ## Todos
 
-- Add documentation with MkDocs (https://www.mkdocs.org/) and MkDocstrings
+- [ ] Add documentation with MkDocs (https://www.mkdocs.org/) and MkDocstrings.
+- [ ] Add one more example (e.g. [Matrix-Cam](https://github.com/joschuck/matrix-webcam/blob/main/matrix_webcam)).
+- [ ] Add custom plugin instructions and template.
+- [ ] Add CI formatting (black, isort) checks.
+- [ ] How to run on Windows and Mac?
+- [ ] How to get rid of manual effort in creating virtual cameras?
