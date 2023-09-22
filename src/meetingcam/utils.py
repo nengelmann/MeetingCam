@@ -1,6 +1,9 @@
-from typing import Any
+from types import MethodType
+from typing import Any, Callable
 
 import cv2
+import depthai
+from constants import MAX_HEIGHT, MAX_WIDTH
 from numpy.typing import NDArray
 from pynput import keyboard
 from typing_extensions import Self
@@ -19,6 +22,7 @@ class VideoCapture(cv2.VideoCapture):
         super().__init__(*args, **kwargs)
         self.width = int(self.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.height = int(self.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        self.img_handler = ImageHandler()
 
     def __enter__(self) -> Self:
         """Enter method for context management, returning self."""
@@ -45,7 +49,11 @@ class VideoCapture(cv2.VideoCapture):
                 " not running in another application."
             )
 
-        return frame
+        # high image resolution is usually not supported by online meeting tools
+        frame = self.img_handler.correct_img_size(frame)
+
+        # return the frame and None, there is no detection available from a webcam
+        return frame, None
 
     def get_fps(self) -> int:
         """Retrieve the frames per second (FPS) of the video capture.
@@ -55,6 +63,66 @@ class VideoCapture(cv2.VideoCapture):
         fps = self.get(cv2.CAP_PROP_FPS)
         print(f"total FPS: {int(fps)}")
         return int(fps)
+
+
+class DepthaiCapture(depthai.Device):
+    """Handle video capture functionalities with depthai.
+
+    Inherits from depthai.Device and extends functionalities with
+    methods to safely enter, exit, get frames and frame rates from
+    a depthai device.
+    """
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Initialize the depthai.Device object and assign width and height properties."""
+        super().__init__(*args, **kwargs)
+        self.width = MAX_WIDTH
+        self.height = MAX_HEIGHT
+        self.img_handler = ImageHandler()
+
+    def __enter__(self) -> Self:
+        """Enter method for context management, returning self."""
+        return self
+
+    def __exit__(self, *args: Any) -> None:
+        """Exit method for context management, releasing the video capture object."""
+        self.close()
+
+    def get_frame(self) -> NDArray[Any]:
+        """
+        Capture a frame from the video stream.
+
+        Returns:
+            A frame and potentially detections which has been captured by the camera.
+        """
+        # get image and detections from depthai plugin (image acquisition function)
+        img, det = self.acquisition()
+
+        # high image resolution is usually not supported by online meeting tools
+        img = self.img_handler.correct_img_size(img)
+
+        return img, det
+
+    def setup(self, setup_func: Callable, acquisition_func: Callable):
+        """Setup initializations defined in the plugins setup function and create an acquisition function also based on plugin specification.
+
+        Args:
+            setup_func --- initialization function of plugin
+            acquisition_func --- handling function for image acquisition of plugin
+        """
+        setup_func(self)
+        self.acquisition = MethodType(acquisition_func, self)
+
+    def get_fps(self) -> int:
+        """Retrieve the frames per second (FPS) of the video capture.
+
+        Prints the total FPS and returns the FPS as an integer.
+        """
+
+        # fps =
+        # print(f"total FPS: {int(fps)}")
+        # return int(fps)
+        raise NotImplementedError
 
 
 class KeyHandler(keyboard.GlobalHotKeys):
@@ -67,6 +135,7 @@ class KeyHandler(keyboard.GlobalHotKeys):
         """Initialize the KeyHandler with hotkeys and their respective states."""
         self.hotkeys = {
             "<ctrl>+<alt>+f": self.f_trigger,
+            "<ctrl>+<alt>+l": self.l_trigger,
             "<ctrl>+<alt>+n": self.n_trigger,
             # '<ctrl>+<alt>+x':self.your_hotkey_x,
             "<ctrl>+<alt>+r": self.bgr2rgb_switch,
@@ -75,6 +144,7 @@ class KeyHandler(keyboard.GlobalHotKeys):
         super().__init__(self.hotkeys)
 
         self.f_trig: bool = False
+        self.l_trig: bool = False
         self.n_trig: bool = False
         # self.x_trig: bool = False
         self.bgr2rgb_sw: bool = False
@@ -93,10 +163,15 @@ class KeyHandler(keyboard.GlobalHotKeys):
         self.f_trig = not self.f_trig
         print("Keyboard trigger 1: ", str(self.f_trig))
 
+    def l_trigger(self) -> None:
+        """Toggle the state of l_trigger and print its status."""
+        self.l_trig = not self.l_trig
+        print("Keyboard trigger 2: ", str(self.l_trig))
+
     def n_trigger(self) -> None:
         """Toggle the state of n_trigger and print its status."""
         self.n_trig = not self.n_trig
-        print("Keyboard trigger 2: ", str(self.n_trig))
+        print("Keyboard trigger 3: ", str(self.n_trig))
 
     # def your_trigger_x(self) -> None:
     #    """Toggle the state of custom_trigger and print its status."""
@@ -175,3 +250,27 @@ class ArgumentHandler:
             return arg
         else:
             return None
+
+
+class ImageHandler:
+    """A class to handle image processing functions."""
+
+    def __init__(self) -> None:
+        """Initialize placeholder."""
+        pass
+
+    def correct_img_size(self, image: NDArray[Any]) -> NDArray[Any]:
+        """Check image for maximum image size and resize if exceeded.
+        The resizing will just be applied on the exceeding dimension (width, height or both) without taking the aspect ratio into account.
+
+        Args:
+            image --- the image to be processed.
+
+        Returns:
+            The processed image.
+        """
+        if image.shape[0] > MAX_HEIGHT or image.shape[1] > MAX_WIDTH:
+            h = min(image.shape[0], MAX_HEIGHT)
+            w = min(image.shape[1], MAX_WIDTH)
+            image = cv2.resize(image, (w, h))
+        return image

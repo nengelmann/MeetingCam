@@ -9,9 +9,12 @@ from pathlib import Path
 from types import FrameType
 from typing import Any
 
+import depthai
+from constants import DEPTHAI, WEBCAM
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.style import Style
+from utils import DepthaiCapture, VideoCapture
 from v4l2ctl import V4l2Capabilities, V4l2Device
 
 
@@ -33,12 +36,12 @@ class V4l2Capture(V4l2Device):
 
 
 class DeviceHandler:
-    """Handles the management and mapping of real and virtual devices."""
+    """Base class for management and mapping of real and virtual devices."""
 
     def __init__(self) -> None:
-        """Initialize the DeviceHandler by setting up necessary mappings and signal handler."""
+        """Initialize the WebcamDevice by setting up necessary mappings and signal handler."""
         signal.signal(signal.SIGINT, self._interrupt)
-        self.update_available()
+
         self.mapping = self.device_mapping()
         self.pprint = DevicePrinter()
 
@@ -64,16 +67,18 @@ class DeviceHandler:
             # device is specified as argument in command line
             if device_path in device_map.keys():
                 # check if specified device is available in real devices and has virtual counterpart
-                real_path = device_path
+                self.real_path = device_path
                 virtual_path = device_map[device_path]
-                return real_path, virtual_path
+                return virtual_path
             else:
                 # if not print that the specified device needs to have a virtual counterpart and how to do it
                 self.pprint.device_not_available(device_path)
                 self.pprint.available_devices(
                     self.mapping, self.available_devices_real
                 )
-                self.pprint.add_virtual_devices(self.available_devices_real)
+                self.pprint.add_virtual_devices(
+                    self.available_devices_real, self.type
+                )
                 self.pprint.run_main_command(self.mapping)
                 sys.exit()
         else:
@@ -82,24 +87,36 @@ class DeviceHandler:
                 # no device is specified, but a real device with virtual counterpart is available
                 # print in the available devices and point out that the first available device with virtual counterpart will be used
                 device = list(device_map.items())[0]
-                real_path = device[0]
+                self.real_path = device[0]
                 virtual_path = device[1]
                 self.pprint.available_devices(
                     self.mapping, self.available_devices_real
                 )
-                self.pprint.used_device(real_path)
-                return real_path, virtual_path
+                self.pprint.run_main_command(self.mapping)
+                sys.exit()
             else:
                 # no device is specified and no real device with virtual counterpart is available
                 self.pprint.device_not_available(device_path)
                 self.pprint.available_devices(
                     self.mapping, self.available_devices_real
                 )
-                self.pprint.add_virtual_devices(self.available_devices_real)
+                self.pprint.add_virtual_devices(
+                    self.available_devices_real, self.type
+                )
                 self.pprint.run_main_command(self.mapping)
                 sys.exit()
 
-    def device_mapping(self) -> dict[int, dict[str, Any]]:
+    def get_device(self):
+        if self.real_path:
+            return VideoCapture(self.real_path)
+        else:
+            raise LookupError(
+                "self.real_path is {self.real_path}. Device initialization"
+                " 'self.init_device(device_path)' is needed before a device"
+                " instance is created."
+            )
+
+    def device_mapping(self) -> dict[int, dict[str, str]]:
         """Create a mapping from real camera devices to virtual camera devices.
 
         Returns:
@@ -108,56 +125,67 @@ class DeviceHandler:
 
         device_map = {}
 
-        (
-            paths_real,
-            labels_real,
-            ids_real,
-            busses_real,
-        ) = self.available_devices_real
-        (
-            paths_virtual,
-            labels_virtual,
-            ids_virtual,
-            busses_virtual,
-        ) = self.available_devices_virtual
+        (paths_real, labels_real) = self.available_devices_real
+        (paths_virtual, labels_virtual) = self.available_devices_virtual
 
         # extract the IDs (first number in virtual camera label) of available virtual cameras for mapping it to real cameras
         # the mapping index is same as real cameras path id. e.g. /dev/video_n_ with n as id
-        mapping_ids = [
-            int(re.findall(r"\d+", label)[0]) for label in labels_virtual
-        ]
-        mapping_indices = [ids_real.index(id) for id in mapping_ids]
+        if self.type == WEBCAM:
+            mapping_ids = [
+                int(re.findall(r"\d+", label)[0]) for label in labels_virtual
+            ]
+            ids_real = [
+                int(path.replace("/dev/video", "")) for path in paths_real
+            ]
+            try:
+                mapping_indices = [ids_real.index(id) for id in mapping_ids]
+            except:
+                print(
+                    "The virtual cameras are not matching with attached real"
+                    " cameras. Has a camera be unplugged?\n"
+                )
+                print(
+                    "The specified virtual label is"
+                    f" {str(labels_virtual)[1:-1]}."
+                )
+                print(
+                    "May you wanted to run MeetingCam with --depthai argument?"
+                )
+                sys.exit(0)
+
+        elif self.type == DEPTHAI:
+            mapping_indices = []
+            for i, mxid in enumerate(paths_real):
+                for j, label in enumerate(labels_virtual):
+                    if mxid in label:
+                        mapping_indices.append(j)
+        else:
+            raise NotImplementedError(
+                "Device type needs to be either 'webcam' or 'depthai'."
+            )
 
         for i, j in enumerate(mapping_indices):
             device_map[i] = {
                 "path_real": paths_real[j],
                 "label_real": labels_real[j],
-                "id_real": ids_real[j],
-                "bus_real": busses_real[j],
                 "path_virtual": paths_virtual[i],
                 "label_virtual": labels_virtual[i],
-                "id_virtual": ids_virtual[i],
-                "bus_virtual": busses_virtual[i],
             }
 
         return device_map
 
-    def get_available(
-        self, real: bool
-    ) -> tuple[list[str], list[str], list[int], list[str]]:
+    def get_available(self, real: bool) -> tuple[list[str], list[str]]:
         """Return a list of available real or virtual camera devices based on the input flag.
 
         Args:
             real --- a flag to determine whether to return real or virtual devices.
 
         Returns:
-            A tuple containing lists of device paths, labels, IDs, and busses.
+            A tuple containing lists of device paths and labels.
         """
 
         device_paths = []
         labels = []
-        ids = []
-        busses = []
 
         with V4l2Capture() as v4l2:
             for device in v4l2.iter_devices(skip_links=True):
@@ -166,41 +194,20 @@ class DeviceHandler:
                     and not self._is_virtual_device(device)
                     and V4l2Capabilities.VIDEO_CAPTURE in device.capabilities
                 ):
-                    device_path, id, label, bus = self._get_device_info(device)
+                    device_path, label = self._get_device_info(device)
                 elif (
                     not real
                     and self._is_virtual_device(device)
                     and V4l2Capabilities.VIDEO_OUTPUT in device.capabilities
                 ):
-                    device_path, id, label, bus = self._get_device_info(device)
+                    device_path, label = self._get_device_info(device)
                 else:
                     continue
 
-                ids.append(id)
                 labels.append(label)
                 device_paths.append(device_path)
-                busses.append(bus)
 
-        return device_paths, labels, ids, busses
-
-    def update_available(self) -> None:
-        """Update the list of available real and virtual devices."""
-        self.available_devices_real = self.get_available(real=True)
-        self.available_devices_virtual = self.get_available(real=False)
-
-    def device_ready(self, device_path: str) -> bool:
-        """Check if the device at the given path is ready.
-
-        Args:
-            device_path --- the device path to check.
-
-        Returns:
-            True if the device is ready, False otherwise.
-        """
-        for device in self.mapping:
-            if device_path == str(self.mapping[device]["real"].device):
-                return True
-        return False
+        return device_paths, labels
 
     def device_running(self) -> None:
         """Print the running devices."""
@@ -218,31 +225,114 @@ class DeviceHandler:
         virtual = True if "platform:v4l2loopback" in str(device.bus) else False
         return virtual
 
-    def _get_device_info(
-        self, device: V4l2Device
-    ) -> tuple[str, int, str, str]:
-        """Extract and return device information including path, ID, label, and bus.
+    def _get_device_info(self, device: V4l2Device) -> tuple[str, str]:
+        """Extract and return device information including path and label.
 
         Args:
             device (V4l2Device) --- the device to extract information from.
 
         Returns:
-            A tuple containing the device path (str), ID (int), label (str), and bus (str).
+            A tuple containing the device path (str) and label (str).
 
         Raises:
             AssertionError: If the device path does not follow the expected format or does not exist.
         """
         device_path = str(device.device)
-        idx = int(device_path.replace("/dev/video", ""))
         card_label = str(device.name)
-        bus = str(device.bus)
+
         assert device_path.__contains__(
             "/dev/video"
         ), "Device name '{device_name}' should be of format '/dev/video_n_'."
         assert Path(
             device_path
         ).exists(), "Device path '{device_name}' does not exist."
-        return device_path, idx, card_label, bus
+        return device_path, card_label
+
+
+class WebcamDevice(DeviceHandler):
+    """Handles the management and mapping of real and virtual webcam devices."""
+
+    def __init__(self) -> None:
+        """Initialize the WebcamDevice class."""
+
+        self.type = WEBCAM
+        self.real_path = None
+        self.available_devices_real = None
+        self.available_devices_virtual = None
+
+        self.update_available()
+        super().__init__()
+
+    def get_device(self):
+        if self.real_path:
+            return VideoCapture(self.real_path)
+        else:
+            raise LookupError(
+                "self.real_path is {self.real_path}. Device initialization"
+                " 'self.init_device(device_path)' is needed before a device"
+                " instance is created."
+            )
+
+    def update_available(self) -> None:
+        """Update the list of available real and virtual devices."""
+        self.available_devices_real = self.get_available(real=True)
+        self.available_devices_virtual = self.get_available(real=False)
+
+
+class DepthaiDevice(DeviceHandler):
+    """Handles the management and mapping of depthai and virtual devices."""
+
+    def __init__(self, pipeline) -> None:
+        """Initialize the WebcamDevice class."""
+
+        self.type = DEPTHAI
+        self.real_path = None
+        self.available_devices_real = None
+        self.available_devices_virtual = None
+
+        self.update_available()
+        super().__init__()
+
+        self.usb_speed = depthai.UsbSpeed.SUPER_PLUS
+        self.device_info = None
+        self.pipeline = pipeline
+
+    def get_device(self):
+        if self.real_path:
+            self.device_info = depthai.DeviceInfo(self.real_path)
+            return DepthaiCapture(
+                pipeline=self.pipeline,
+                deviceInfo=self.device_info,
+                maxUsbSpeed=self.usb_speed,
+            )
+        else:
+            raise LookupError(
+                "self.real_path is {self.real_path}. Device initialization"
+                " 'self.init_device(device_path)' is needed before a device"
+                " instance is created."
+            )
+
+    def update_available(self) -> None:
+        """Update the list of available real and virtual devices."""
+        self.available_devices_real = self.get_available_depthai()
+        self.available_devices_virtual = self.get_available(real=False)
+
+    def get_available_depthai(self) -> dict:
+        """Get available depthai camera devices.
+
+        Returns:
+            dict: _description_
+        """
+        device_paths = []
+        labels = []
+
+        device_info = depthai.Device.getAllAvailableDevices()
+
+        for device in device_info:
+            labels.append(f"OAK Device on port {device.name}")
+            device_paths.append(device.mxid)
+
+        return device_paths, labels
 
 
 class DevicePrinter:
@@ -276,7 +366,7 @@ class DevicePrinter:
         The method extracts real and mapped device information and formats them for console printing.
         """
 
-        (paths_real, labels_real, _, _) = available_devices_real
+        (paths_real, labels_real) = available_devices_real
 
         devices_real = [
             "|" + label + "|" + str(path) + "|"
@@ -320,9 +410,8 @@ class DevicePrinter:
 
     def add_virtual_devices(
         self,
-        available_devices_real: tuple[
-            list[str], list[str], list[int], list[str]
-        ],
+        available_devices_real: tuple[list[str], list[str]],
+        type: str | int,
     ) -> None:
         """
         Print instructions to add virtual devices to the console.
@@ -332,22 +421,49 @@ class DevicePrinter:
 
         The method extracts device labels and ids to create instructions for adding virtual devices and prints them to the console.
         """
-        (_, labels, ids, _) = available_devices_real
+        (device_paths, labels) = available_devices_real
 
         cli_cmd_single = []
         labels_str = []
-        for idx, label in zip(ids, labels):
-            cli_cmd_single.append(
-                "`sudo modprobe v4l2loopback devices=1"
-                f" video_nr={idx} card_label='MeetingCam{idx} {label}'`"
-            )
-            labels_str.append(f"MeetingCam{idx} {label}")
 
-        labels_str = str(labels_str).replace(", ", ",")[1:-1]
-        cli_cmd_multi = (
-            "`sudo modprobe v4l2loopback"
-            f" devices={len(ids)} video_nr={str(ids).replace(' ', '')[1:-1]} card_label='{labels_str[1:-1]}'`"
-        )
+        if type == WEBCAM:
+            ids = [
+                int(path.replace("/dev/video", "")) for path in device_paths
+            ]
+            vd_nrs = ids
+            for idx, label in zip(ids, labels):
+                cli_cmd_single.append(
+                    "`sudo modprobe v4l2loopback devices=1"
+                    f" video_nr={idx} card_label='MeetingCam{idx} {label}'`"
+                )
+                labels_str.append(f"MeetingCam{idx} {label}")
+
+            labels_str = str(labels_str).replace(", ", ",")[1:-1]
+            vd_nrs = str(vd_nrs).replace(" ", "")[1:-1]
+            cli_cmd_multi = (
+                "`sudo modprobe v4l2loopback"
+                f" devices={len(ids)} video_nr={str(vd_nrs)} card_label='{labels_str[1:-1]}'`"
+            )
+        elif type == DEPTHAI:
+            ids = device_paths
+            for idx, label in zip(ids, labels):
+                cli_cmd_single.append(
+                    "`sudo modprobe v4l2loopback devices=1"
+                    f" card_label='MeetingCam{idx} {label}'`"
+                )
+                labels_str.append(f"MeetingCam{idx} {label}")
+
+            labels_str = str(labels_str).replace(", ", ",")[1:-1]
+            cli_cmd_multi = (
+                "`sudo modprobe v4l2loopback"
+                f" devices={len(ids)} card_label='{labels_str[1:-1]}'`"
+            )
+
+        else:
+            raise NotImplementedError(
+                "Device type needs to be either 'webcam' or 'depthai'."
+            )
+
         cli_cmd_single = (
             str(cli_cmd_single).replace(", ", "\n\n").replace('"', "")[1:-1]
         )
@@ -402,7 +518,7 @@ class DevicePrinter:
             " devices real path, e.g. '/dev/video0'."
         )
 
-    def run_main_command(self, device_map: dict[int, dict[str, Any]]) -> None:
+    def run_main_command(self, device_map: dict[int, dict[str, str]]) -> None:
         """Print a message guiding the user to run the main command depending on the device map status.
 
         Args:
@@ -490,10 +606,4 @@ class DevicePrinter:
 
 
 if __name__ == "__main__":
-    device_handler = DeviceHandler()
-    pprint = DevicePrinter()
-
-    device_paths, labels, ids, busses = device_handler.get_available(real=True)
-
-    pprint.available_devices(labels, ids)
-    pprint.add_virtual_devices(labels, ids)
+    pass

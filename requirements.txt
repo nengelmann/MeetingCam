@@ -6,6 +6,14 @@
 #
 addict==2.4.0
     # via openvino-dev
+blobconverter==1.4.2
+    # via -r requirements.in
+boto3==1.28.52
+    # via blobconverter
+botocore==1.31.52
+    # via
+    #   boto3
+    #   s3transfer
 certifi==2023.7.22
     # via requests
 charset-normalizer==3.2.0
@@ -14,19 +22,25 @@ click==8.1.7
     # via typer
 defusedxml==0.7.1
     # via openvino-dev
+depthai==2.22.0.0
+    # via -r requirements.in
 evdev==1.6.1
     # via pynput
 idna==3.4
     # via requests
+jmespath==1.0.1
+    # via
+    #   boto3
+    #   botocore
 jstyleson==0.0.2
     # via openvino-dev
 markdown-it-py==3.0.0
     # via rich
 mdurl==0.1.2
     # via markdown-it-py
-networkx==2.8.8
+networkx==3.1
     # via openvino-dev
-numpy==1.24.4
+numpy==1.26.0
     # via
     #   opencv-python
     #   opencv-python-headless
@@ -38,33 +52,44 @@ opencv-python==4.8.0.76
     # via openvino-dev
 opencv-python-headless==4.8.0.76
     # via -r requirements.in
-openvino==2023.0.2
+openvino==2023.1.0
     # via openvino-dev
-openvino-dev==2023.0.2
+openvino-dev==2023.1.0
     # via -r requirements.in
 openvino-telemetry==2023.1.1
-    # via openvino-dev
-pillow==10.0.0
+    # via
+    #   openvino
+    #   openvino-dev
+pillow==10.0.1
     # via openvino-dev
 pygments==2.16.1
     # via rich
 pynput==1.7.6
     # via -r requirements.in
+python-dateutil==2.8.2
+    # via botocore
 python-xlib==0.33
     # via pynput
 pyvirtualcam==0.10.2
     # via -r requirements.in
 pyyaml==6.0.1
-    # via openvino-dev
+    # via
+    #   blobconverter
+    #   openvino-dev
 requests==2.31.0
-    # via openvino-dev
-rich==13.5.2
+    # via
+    #   blobconverter
+    #   openvino-dev
+rich==13.5.3
     # via -r requirements.in
+s3transfer==0.6.2
+    # via boto3
 scipy==1.10.1
     # via openvino-dev
 six==1.16.0
     # via
     #   pynput
+    #   python-dateutil
     #   python-xlib
 texttable==1.6.7
     # via openvino-dev
@@ -72,9 +97,11 @@ tqdm==4.66.1
     # via openvino-dev
 typer==0.9.0
     # via -r requirements.in
-typing-extensions==4.7.1
+typing-extensions==4.8.0
     # via typer
-urllib3==2.0.4
-    # via requests
+urllib3==1.26.16
+    # via
+    #   botocore
+    #   requests
 v4l2ctl==0.1a5
     # via -r requirements.in

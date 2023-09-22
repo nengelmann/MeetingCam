@@ -4,9 +4,10 @@ from pathlib import Path
 from typing import Any
 
 import cv2
+from constants import WEBCAM
 from numpy.typing import NDArray
 
-from ..plugin_base import PluginBase
+from ..plugin_utils import PluginBase
 from .model import FaceDetector
 from .utils import box_area, draw_bbox
 
@@ -58,14 +59,18 @@ class FaceDetection(PluginBase):
         else:
             self.name = "Code Ninja"
             print("\nYou have not specified your name ('--name' YourName).")
-            print(f"I simply name you {self.name}")
+            print(f"I simply name you {self.name}\n")
 
         self.detector = FaceDetector(
             model_path=model_path, confidence_thr=0.9, overlap_thr=0.7
         )
+        self.type = WEBCAM
 
     def process(
-        self, image: NDArray[Any], trigger: tuple[bool, bool]
+        self,
+        image: NDArray[Any],
+        detection: Any,
+        trigger: tuple[bool, bool, bool],
     ) -> NDArray[Any]:
         """Process the input image and return the image with detected face annotations.
 
@@ -73,7 +78,7 @@ class FaceDetection(PluginBase):
 
         Args:
             image --- the input image to be processed.
-            trigger --- a tuple containing two boolean values indicating whether to draw bounding boxes and name annotations.
+            trigger --- a tuple containing boolean values indicating whether to draw bounding boxes and name annotations.
 
         Returns:
             The processed image with face and name annotations.
@@ -99,7 +104,7 @@ class FaceDetection(PluginBase):
                     corner_len=ceil(h * self.th_scale * 8),
                 )
             # If n_trigger <Ctrl+Alt+n> is True, print in the name above the bbox
-            if trigger[1] and self.name:
+            if trigger[2] and self.name:
                 x1, y1 = bboxes[idx][:2]
                 image = cv2.putText(
                     image,

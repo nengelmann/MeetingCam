@@ -52,9 +52,12 @@ sudo modprobe v4l2loopback devices=3 video_nr=8,9,10 card_label="webcam-1,webcam
 
 ## Todos
 
+- [x] Support for depthai
 - [ ] Add documentation with MkDocs (https://www.mkdocs.org/) and MkDocstrings.
 - [ ] Add one more example (e.g. [Matrix-Cam](https://github.com/joschuck/matrix-webcam/blob/main/matrix_webcam)).
 - [ ] Add custom plugin instructions and template.
 - [ ] Add CI formatting (black, isort) checks.
 - [ ] How to run on Windows and Mac?
 - [ ] How to get rid of manual effort in creating virtual cameras?
+- [ ] Extend face detection example to perform similarity. Example [here](https://github.com/luxonis/depthai-experiments/tree/master/gen2-face-recognition).
+- [ ] 'for device in v4l2.iter_devices(skip_links=True):' with 'exclusive_caps=1' is likely to fail with 'IndexError: list index out of range'. Seems to be a problem with the 'v4l2' library.
