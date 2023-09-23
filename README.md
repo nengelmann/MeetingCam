@@ -136,10 +136,10 @@ The main purpose is that if your camera is outputting an RGB stream by default y
 
 ### Restrictions
 
-**Resolution**
+**Resolution** \
 In general most meeting tools have the restriction on camera/video resolution, mostly 720p (1270x720 pixels). Make sure to not send a virtual video stream with higher resolution. If it breaks due to resolution you can select the virtual camera in the meeting tool but it will either show "Camera failed" or a black video stream.
 
-**Chrome/Chromium Browser**
+**Chrome/Chromium Browser** \
 Chrome/Chromium might need to be ran with 'exclusive_caps=1' in the 'sudo modprobe v4l2loopback' command which is not (yet) supported by MeetingCam.
 
 ### Tool compatibility
@@ -166,6 +166,7 @@ More information on how to setup virtual cameras can be found [here](https://wik
 
 You can customize this repo for your needs, you can also write your own AI-Plugin for running your models on Zoom, Teams or Meets. \
 More information about that in [DEVELOP.md](DEVELOP.md)
+Templates on how to run your custom AI will follow...
 
 ### Usage with depthai camera
 

@@ -53,6 +53,7 @@ sudo modprobe v4l2loopback devices=3 video_nr=8,9,10 card_label="webcam-1,webcam
 ## Todos
 
 - [x] Support for depthai
+- [ ] Add Template on how to run custom models
 - [ ] Add documentation with MkDocs (https://www.mkdocs.org/) and MkDocstrings.
 - [ ] Add one more example (e.g. [Matrix-Cam](https://github.com/joschuck/matrix-webcam/blob/main/matrix_webcam)).
 - [ ] Add custom plugin instructions and template.
