@@ -111,10 +111,16 @@ You'll run it with main.py as described under the usage section. \
 
 It will make an depthai OKA device as virtual camera available in your meeting tools. You join a meeting, select the virtual camera.
 By default it will show an unmodified camera stream of your real camera.
-![Just as is ...](./assets/example_depthai_yolov5_coco.jpg)
 
-Let's press **<Ctrl+Alt+h>** for unhiding the camera detections! \
-![COCO Detections](./assets/example_depthai_yolov5_coco_with_detection.jpg)
+<p align="center">
+<img src="./assets/example_depthai_yolov5_coco.jpg" width=40% height=40%>
+</p>
+
+Let's press **<Ctrl+Alt+h>** for unhiding the camera detections!
+
+<p align="center">
+<img src="./assets/example_depthai_yolov5_coco_with_detection.jpg" width=40% height=40%>
+</p>
 
 In this example, the neural network runs directly on the OAK camera, not on your PC.
 
