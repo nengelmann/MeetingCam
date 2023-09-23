@@ -13,6 +13,12 @@ https://github.com/nengelmann/MeetingCam/assets/120744129/ec2e608d-e785-4179-ba3
 
 ## Installation
 
+0. Clone this repo
+
+   ```bash
+   git clone https://github.com/nengelmann/MeetingCam.git && cd MeetingCam
+   ```
+
 1. Install [virtualenv](https://virtualenv.pypa.io/en/stable/installation.html)
 
 2. Create a virtual python3.10 environment
