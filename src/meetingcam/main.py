@@ -11,9 +11,12 @@ like color space conversion, image flipping, and face detection functionalities.
 import cv2
 import pyvirtualcam
 import typer
-from device import DeviceHandler
+from constants import DEPTHAI, WEBCAM
+from device import DepthaiDevice, WebcamDevice
+from plugins.depthai_yolov5_coco.plugin import Yolov5
 from plugins.face_detection.plugin import FaceDetection
-from utils import ArgumentHandler, KeyHandler, VideoCapture
+from plugins.plugin_utils import PluginBase
+from utils import ArgumentHandler, InvalidArgumentError, KeyHandler
 
 app = typer.Typer()
 
@@ -21,7 +24,11 @@ app = typer.Typer()
 @app.command(
     context_settings={"allow_extra_args": True, "ignore_unknown_options": True}
 )
-def main(ctx: typer.Context, device_path: str | None = None) -> None:
+def main(
+    ctx: typer.Context,
+    device_path: str | None = None,
+    depthai: bool = False,
+) -> None:
     """Initialize the several handlers, real and virtual camera devices for video frame capture and processing and run the whole pipeline.
     It integrates keyboard listeners for real-time user inputs to manipulate video streams.
 
@@ -29,28 +36,59 @@ def main(ctx: typer.Context, device_path: str | None = None) -> None:
         ctx (typer.Context): Context information from the command line.
         device_path (str | None): The device path for the real camera. Defaults to None.
     """
+
     # preprocess extra arguments, e.g. for custom plugin
     extra_args = ArgumentHandler(ctx.args)
     extra_args.print(ctx.args)
 
-    # initialize camera device handler
-    device_handler = DeviceHandler()
-    device_path_real, device_path_virtual = device_handler.init_device(
-        device_path
-    )
+    if depthai:
+        # define your plugin
+        plugin = Yolov5()
 
-    # setup plugin with extra argument --name
-    name = extra_args.get("--name", ctx.args)
-    img_processor = FaceDetection(name=name)
+        # initialize camera device handler with OAK as input device
+        device_handler = DepthaiDevice(plugin.pipeline)
+        virtual_path = device_handler.init_device(device_path)
+
+    else:
+        # handle extra argument --name, if defined
+        name = extra_args.get("--name", ctx.args)
+        # define your plugin
+        plugin = FaceDetection(name=name)
+
+        # initialize camera device handler with webcam as input device
+        device_handler = WebcamDevice()
+        virtual_path = device_handler.init_device(device_path)
+
+    # perform some checks on given configuration before camera is started
+    if plugin.type is None:
+        raise NotImplementedError(
+            "Your plugin needs to have a plugin type asigend. plugin.type"
+            " WEBCAM | DEPTHAI"
+        )
+    if depthai and plugin.type == WEBCAM:
+        raise InvalidArgumentError(
+            "The cli flag 'depthai' is set but the plugin you run is meant for"
+            " webcam usage."
+        )
+
+    if not depthai and plugin.type == DEPTHAI:
+        raise InvalidArgumentError(
+            "The cli flag 'depthai' is not set but the plugin you run is meant"
+            " for depthai usage."
+        )
 
     # initialize real camera, to get frames
-    with VideoCapture(device_path_real) as r_cam:
+    with device_handler.get_device() as r_cam:
+        # custom setup for depthai (on device handling)
+        if depthai:
+            r_cam.setup(plugin.device_setup, plugin.acquisition)
+
         # initialize a virtual camera where the modified frames will be sent to
         with pyvirtualcam.Camera(
             width=r_cam.width,
             height=r_cam.height,
-            fps=60,
-            device=device_path_virtual,
+            fps=24,
+            device=virtual_path,
         ) as v_cam:
             # initialize a keyboard listener to get and use keystroke during runtime as trigger or switch
             with KeyHandler() as listener:
@@ -61,15 +99,20 @@ def main(ctx: typer.Context, device_path: str | None = None) -> None:
 
                 # get frames from real camera, process it and sent it out via virtual camera
                 while True:
-                    frame = r_cam.get_frame()
+                    # get a frame and optionally some on camera detections
+                    frame, detection = r_cam.get_frame()
 
                     # convert bgr to rgb if <Ctrl+Alt+r> keys are pressed
                     if listener.bgr2rgb_sw:
                         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
-                    # pass trigger <Ctrl+Alt+f> and <Ctrl+Alt+n> for face detection and name in prints to face detector plugin
-                    trigger = (listener.f_trig, listener.n_trig)
-                    frame = img_processor.process(frame, trigger)
+                    # pass trigger <Ctrl+Alt+f>, <Ctrl+Alt+l> and <Ctrl+Alt+n> for usage in plugin
+                    trigger = (
+                        listener.f_trig,
+                        listener.l_trig,
+                        listener.n_trig,
+                    )
+                    frame = plugin.process(frame, detection, trigger)
 
                     # flip image if <Ctrl+Alt+m> keys are pressed
                     if listener.mirror_sw:
