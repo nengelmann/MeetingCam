@@ -73,9 +73,13 @@ class DeviceHandler:
             else:
                 # if not print that the specified device needs to have a virtual counterpart and how to do it
                 self.pprint.device_not_available(device_path)
-                self.pprint.available_devices(self.mapping, self.available_devices_real)
-                self.pprint.add_virtual_devices(self.available_devices_real, self.type)
-                self.pprint.run_main_command(self.mapping)
+                self.pprint.available_devices(
+                    self.mapping, self.available_devices_real
+                )
+                self.pprint.add_virtual_devices(
+                    self.available_devices_real, self.type
+                )
+                self.pprint.run_main_command(self.mapping, self.type)
                 sys.exit()
         else:
             # device is not specified
@@ -85,15 +89,21 @@ class DeviceHandler:
                 device = list(device_map.items())[0]
                 self.real_path = device[0]
                 virtual_path = device[1]
-                self.pprint.available_devices(self.mapping, self.available_devices_real)
-                self.pprint.run_main_command(self.mapping)
+                self.pprint.available_devices(
+                    self.mapping, self.available_devices_real
+                )
+                self.pprint.run_main_command(self.mapping, self.type)
                 sys.exit()
             else:
                 # no device is specified and no real device with virtual counterpart is available
                 self.pprint.device_not_available(device_path)
-                self.pprint.available_devices(self.mapping, self.available_devices_real)
-                self.pprint.add_virtual_devices(self.available_devices_real, self.type)
-                self.pprint.run_main_command(self.mapping)
+                self.pprint.available_devices(
+                    self.mapping, self.available_devices_real
+                )
+                self.pprint.add_virtual_devices(
+                    self.available_devices_real, self.type
+                )
+                self.pprint.run_main_command(self.mapping, self.type)
                 sys.exit()
 
     def device_mapping(self) -> dict[int, dict[str, str]]:
@@ -114,7 +124,9 @@ class DeviceHandler:
             mapping_ids = [
                 int(re.findall(r"\d+", label)[0]) for label in labels_virtual
             ]
-            ids_real = [int(path.replace("/dev/video", "")) for path in paths_real]
+            ids_real = [
+                int(path.replace("/dev/video", "")) for path in paths_real
+            ]
             try:
                 mapping_indices = [ids_real.index(id) for id in mapping_ids]
             except:
@@ -122,8 +134,13 @@ class DeviceHandler:
                     "The virtual cameras are not matching with attached real"
                     " cameras. Has a camera be unplugged?\n"
                 )
-                print("The specified virtual label is" f" {str(labels_virtual)[1:-1]}.")
-                print("May you wanted to run MeetingCam with --depthai argument?")
+                print(
+                    "The specified virtual label is"
+                    f" {str(labels_virtual)[1:-1]}."
+                )
+                print(
+                    "May you wanted to run MeetingCam with --depthai argument?"
+                )
                 sys.exit(0)
 
         elif self.type == DEPTHAI:
@@ -216,7 +233,9 @@ class DeviceHandler:
         assert device_path.__contains__(
             "/dev/video"
         ), "Device name '{device_name}' should be of format '/dev/video_n_'."
-        assert Path(device_path).exists(), "Device path '{device_name}' does not exist."
+        assert Path(
+            device_path
+        ).exists(), "Device path '{device_name}' does not exist."
         return device_path, card_label
 
 
@@ -339,7 +358,9 @@ class DevicePrinter:
     def available_devices(
         self,
         device_map: dict[int, dict[str, Any]],
-        available_devices_real: tuple[list[str], list[str], list[int], list[str]],
+        available_devices_real: tuple[
+            list[str], list[str], list[int], list[str]
+        ],
     ) -> None:
         """
         Print available real and virtual devices to the console.
@@ -357,7 +378,9 @@ class DevicePrinter:
             "|" + label + "|" + str(path) + "|"
             for label, path in zip(labels_real, paths_real)
         ]
-        devices_real = str(devices_real).replace("'", "").replace(", ", "\n")[1:-1]
+        devices_real = (
+            str(devices_real).replace("'", "").replace(", ", "\n")[1:-1]
+        )
 
         devices_mapped = [
             "|"
@@ -371,7 +394,9 @@ class DevicePrinter:
             + "|"
             for v in device_map.values()
         ]
-        devices_mapped = str(devices_mapped).replace("'", "").replace(", ", "\n")[1:-1]
+        devices_mapped = (
+            str(devices_mapped).replace("'", "").replace(", ", "\n")[1:-1]
+        )
 
         text = f"""
         # Available devices
@@ -408,7 +433,9 @@ class DevicePrinter:
         labels_str = []
 
         if type == WEBCAM:
-            ids = [int(path.replace("/dev/video", "")) for path in device_paths]
+            ids = [
+                int(path.replace("/dev/video", "")) for path in device_paths
+            ]
             vd_nrs = ids
             for idx, label in zip(ids, labels):
                 cli_cmd_single.append(
@@ -489,13 +516,17 @@ class DevicePrinter:
 
     def used_device(self, real_path: str) -> None:
         self.console.print("Device ready! :ok_hand:", style=self.ok_style)
-        self.console.print(f"Using device on {real_path}.", style=Style(bold=True))
+        self.console.print(
+            f"Using device on {real_path}.", style=Style(bold=True)
+        )
         self.console.print(
             "To use another device, specify it via command line and the"
             " devices real path, e.g. '/dev/video0'."
         )
 
-    def run_main_command(self, device_map: dict[int, dict[str, str]]) -> None:
+    def run_main_command(
+        self, device_map: dict[int, dict[str, str]], type: str | int
+    ) -> None:
         """Print a message guiding the user to run the main command depending on the device map status.
 
         Args:
@@ -509,7 +540,9 @@ class DevicePrinter:
             return
 
         elif len(device_map) == 1:
-            self.console.print("\nAlright, a device has been added. :white_check_mark:")
+            self.console.print(
+                "\nAlright, a device has been added. :white_check_mark:"
+            )
 
         else:
             ticks = (
@@ -517,7 +550,9 @@ class DevicePrinter:
                 .replace("'", "")
                 .replace(", ", " ")[1:-1]
             )
-            self.console.print(f"\nAlright, multiple devices have been added. {ticks}")
+            self.console.print(
+                f"\nAlright, multiple devices have been added. {ticks}"
+            )
 
         self.console.print("Now it's time to run MeetingCam!\n")
 
@@ -525,15 +560,24 @@ class DevicePrinter:
             self.console.print(
                 f"For {device['label_real']} run:", style=Style(bold=True)
             )
+        if type == WEBCAM:
             self.console.print(
                 "python src/meetingcam/main.py --device-path"
                 f" {device['path_real']} --name YourName",
                 style="bold cyan on black",
             )
+        elif type == DEPTHAI:
+            self.console.print(
+                "python src/meetingcam/main.py --device-path"
+                f" {device['path_real']} --depthai",
+                style="bold cyan on black",
+            )
 
     def device_running(self) -> None:
         """Print a message indicating that the device is currently running and how to access the stream."""
-        self.console.print("Device running! :arrow_forward:", style=self.ok_style)
+        self.console.print(
+            "Device running! :arrow_forward:", style=self.ok_style
+        )
         self.console.print(
             "You can now access the modified camera stream in Meets, Teams or"
             " Zoom. :rocket:",
@@ -546,7 +590,9 @@ class DevicePrinter:
 
     def device_stopped(self) -> None:
         """Print a message indicating that the device has stopped and can now be accessed normally."""
-        self.console.print("Device stopped. :raised_hand:", style=self.danger_style)
+        self.console.print(
+            "Device stopped. :raised_hand:", style=self.danger_style
+        )
         self.console.print(
             "You can access your device now as usual. MeetingCam has stopped.",
             style=Style(bold=True),
