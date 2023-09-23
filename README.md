@@ -78,6 +78,8 @@ https://github.com/nengelmann/MeetingCam/assets/120744129/ec2e608d-e785-4179-ba3
 If you **restart** your system, it **will** unload the module and **undo the above device setup** \
 You can also run `sudo modprobe -r v4l2loopback` to undo the device setup.
 
+**You are** now already **running the default example**, see below for more information. ⬇️
+
 ## Face Detection Example
 
 The default and current only webcam AI-Plugin is the Face Detection example.
@@ -85,14 +87,17 @@ The default and current only webcam AI-Plugin is the Face Detection example.
 You'll run it with main.py as described under the usage section. \
 `python src/meetingcam/main.py --device-path /dev/videoX --name YourName`
 
-It will make a virtual camera available in your meeting tools. You join a meeting, select the virtual camera e.g. 'MeetingCamX CameraName'.
+It will make a virtual camera available in your meeting tools. You join a meeting, select the virtual camera e.g. 'MeetingCamX CameraName'. \
 By default it will show an unmodified camera stream of your real camera.
+
 ![Just you ...](./assets/example_face_detection_no_trigger.png)
 
 Let's press **<Ctrl+Alt+f>** for detection of your face!
+
 ![Face Detection](./assets/example_face_detection_face_f_trigger.png)
 
 You can now show your name with **<Ctrl+Alt+n>**.
+
 ![Face Detection](./assets/example_face_detection_n_+_f_trigger.png)
 
 _Actually your face is already detected the hotkey command just enables the print in of the detection._
