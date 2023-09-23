@@ -45,7 +45,7 @@ https://github.com/nengelmann/MeetingCam/assets/120744129/ec2e608d-e785-4179-ba3
    ```bash
    source .venv/bin/activate
    ```
-3. Run the main.py file to get custom instructions on how to create virtual cameras with your web cam. \
+3. Run the main.py to get custom instructions on how to create virtual cameras with your web cam. \
    A virtual camera is needed to stream the modified camera images to your meeting tools like teams, zoom or meets.
 
    ```bash
@@ -55,7 +55,13 @@ https://github.com/nengelmann/MeetingCam/assets/120744129/ec2e608d-e785-4179-ba3
    Don't be confused, you'll need to add your camera with another (sudo) bash command like `sudo modprobe v4l2loopback devices=1 video_nr=0 card_label="MeetingCam0"`. \
    The main.py file will provide more info on how this command needs to be for your system/camera.
 
-4. In the terminal you see which command you need to run for your specific camera setup. \
+4. After you added your virtual device or devices, run the main.py again.
+
+   ```bash
+   python ./src/meetingcam/main.py
+   ```
+
+   In the terminal you'll then see which command you need to run for your specific camera setup. \
    It should look like:
 
    _For YOUR CAMERA DEVICE run:_ \
