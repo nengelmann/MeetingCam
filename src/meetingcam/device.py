@@ -560,18 +560,18 @@ class DevicePrinter:
             self.console.print(
                 f"For {device['label_real']} run:", style=Style(bold=True)
             )
-        if type == WEBCAM:
-            self.console.print(
-                "python src/meetingcam/main.py --device-path"
-                f" {device['path_real']} --name YourName",
-                style="bold cyan on black",
-            )
-        elif type == DEPTHAI:
-            self.console.print(
-                "python src/meetingcam/main.py --device-path"
-                f" {device['path_real']} --depthai",
-                style="bold cyan on black",
-            )
+            if type == WEBCAM:
+                self.console.print(
+                    "python src/meetingcam/main.py --device-path"
+                    f" {device['path_real']} --name YourName",
+                    style="bold cyan on black",
+                )
+            elif type == DEPTHAI:
+                self.console.print(
+                    "python src/meetingcam/main.py --device-path"
+                    f" {device['path_real']} --depthai",
+                    style="bold cyan on black",
+                )
 
     def device_running(self) -> None:
         """Print a message indicating that the device is currently running and how to access the stream."""
