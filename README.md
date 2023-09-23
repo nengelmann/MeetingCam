@@ -170,13 +170,6 @@ Templates on how to run your custom AI will follow...
 
 ### Usage with depthai camera
 
-#### Install additional dependencies
-
-```bash
- source .venv/bin/activate
- pip install depthai
-```
-
 #### Run OAK devices as webcam (uvc)
 
 Run OAK devices as uvc before normal usage of MeetingCam.
