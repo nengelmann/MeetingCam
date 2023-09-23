@@ -116,7 +116,7 @@ By default it will show an unmodified camera stream of your real camera.
 <img src="./assets/example_depthai_yolov5_coco.jpg" width=40% height=40%>
 </p>
 
-Let's press **<Ctrl+Alt+h>** for unhiding the camera detections!
+Let's press **<Ctrl+Alt+l>** for unhiding the camera detections!
 
 <p align="center">
 <img src="./assets/example_depthai_yolov5_coco_with_detection.jpg" width=40% height=40%>
