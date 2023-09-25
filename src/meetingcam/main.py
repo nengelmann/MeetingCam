@@ -52,19 +52,21 @@ def main(
         virtual_path = device_handler.init_device(device_path)
 
     elif roboflow:
-        # define plugin
+        # handle extra argument --name, if defined
         roboflow_api_key = extra_args.get("--roboflow-api-key", ctx.args)
         project_name = extra_args.get("--project-name", ctx.args)
         version = extra_args.get("--version", ctx.args)
-
+        # define plugin
         plugin = RoboflowDetection(roboflow_api_key, project_name, version)
+        # initialize camera device handler with webcam as input device
+        device_handler = WebcamDevice()
+        virtual_path = device_handler.init_device(device_path)
 
     else:
         # handle extra argument --name, if defined
         name = extra_args.get("--name", ctx.args)
         # define plugin
         plugin = FaceDetection(name=name)
-
         # initialize camera device handler with webcam as input device
         device_handler = WebcamDevice()
         virtual_path = device_handler.init_device(device_path)
@@ -72,7 +74,7 @@ def main(
     # perform some checks on given configuration before camera is started
     if plugin.type is None:
         raise NotImplementedError(
-            "Your plugin needs to have a plugin type asigend. plugin.type"
+            "Your plugin needs to have a plugin type assigned. plugin.type"
             " WEBCAM | DEPTHAI"
         )
     if depthai and plugin.type == WEBCAM:

@@ -124,6 +124,15 @@ Let's press **<Ctrl+Alt+l>** for unhiding the camera detections!
 
 In this example, the neural network runs directly on the OAK camera, not on your PC.
 
+## Roboflow Example
+
+_TODO_
+e.g.:
+
+```bash
+python src/meetingcam/main.py --roboflow --roboflow-api-key YOUR_API_KEY --project-name meetingcam-roboflow-example-objectdetection --version 1 --device-path /dev/video0
+```
+
 ## Switches
 
 There are two switches build in. They allow you to switch the image color channel from BGR to RGB and to mirror the video stream.
@@ -187,3 +196,7 @@ Follow the steps in the [Usage](#Usage) section normally, just append a '--depth
  source .venv/bin/activate
  python src/meetingcam/main.py --depthai
 ```
+
+### Usage with Roboflow
+
+_TODO_
