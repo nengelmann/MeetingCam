@@ -25,6 +25,9 @@ class RoboflowDetection(PluginBase):
 
         Args:
             api_key --- your roboflow API key.
+            project_name --- your roboflow project name.
+            version --- your roboflow project version.
+            confidence --- confidence threshold for your model.
 
         Raises:
             SystemExit: If no API key is given.
@@ -70,9 +73,7 @@ class RoboflowDetection(PluginBase):
             )
 
         self.class_list = [c for c in project.classes.keys()]
-        self.url = (
-            f"http://localhost:9001/{project_name}/{version}?image_type=numpy"
-        )
+        self.url = f"http://localhost:9001/{project_name}/{version}?image_type=numpy"
         self.headers = {"Content-Type": "application/json"}
         self.params = {
             "api_key": api_key,
