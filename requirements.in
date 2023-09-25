@@ -1,9 +1,11 @@
 depthai
 blobconverter
+inference
 opencv-python-headless
 openvino-dev
 pynput
 pyvirtualcam
 rich
+roboflow
 typer
 v4l2ctl

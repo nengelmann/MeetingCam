@@ -14,8 +14,9 @@ import typer
 from constants import DEPTHAI, WEBCAM
 from device import DepthaiDevice, WebcamDevice
 from plugins.depthai_yolov5_coco.plugin import Yolov5
-from plugins.face_detection.plugin import FaceDetection
+from plugins.openvino_face_detection.plugin import FaceDetection
 from plugins.plugin_utils import PluginBase
+from plugins.roboflow_general.plugin import RoboflowDetection
 from utils import ArgumentHandler, InvalidArgumentError, KeyHandler
 
 app = typer.Typer()
@@ -28,6 +29,7 @@ def main(
     ctx: typer.Context,
     device_path: str | None = None,
     depthai: bool = False,
+    roboflow: bool = False,
 ) -> None:
     """Initialize the several handlers, real and virtual camera devices for video frame capture and processing and run the whole pipeline.
     It integrates keyboard listeners for real-time user inputs to manipulate video streams.
@@ -42,17 +44,25 @@ def main(
     extra_args.print(ctx.args)
 
     if depthai:
-        # define your plugin
+        # define plugin
         plugin = Yolov5()
 
         # initialize camera device handler with OAK as input device
         device_handler = DepthaiDevice(plugin.pipeline)
         virtual_path = device_handler.init_device(device_path)
 
+    elif roboflow:
+        # define plugin
+        roboflow_api_key = extra_args.get("--roboflow-api-key", ctx.args)
+        project_name = extra_args.get("--project-name", ctx.args)
+        version = extra_args.get("--version", ctx.args)
+
+        plugin = RoboflowDetection(roboflow_api_key, project_name, version)
+
     else:
         # handle extra argument --name, if defined
         name = extra_args.get("--name", ctx.args)
-        # define your plugin
+        # define plugin
         plugin = FaceDetection(name=name)
 
         # initialize camera device handler with webcam as input device

@@ -20,8 +20,11 @@ class VideoCapture(cv2.VideoCapture):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Initialize the VideoCapture object with width and height properties."""
         super().__init__(*args, **kwargs)
-        self.width = int(self.get(cv2.CAP_PROP_FRAME_WIDTH))
-        self.height = int(self.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        cam_width = int(self.get(cv2.CAP_PROP_FRAME_WIDTH))
+        cam_height = int(self.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        self.width = min(cam_width, MAX_WIDTH)
+        self.height = min(cam_height, MAX_HEIGHT)
+
         self.img_handler = ImageHandler()
 
     def __enter__(self) -> Self:

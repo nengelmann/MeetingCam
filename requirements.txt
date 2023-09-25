@@ -6,52 +6,113 @@
 #
 addict==2.4.0
     # via openvino-dev
+anyio==4.0.0
+    # via starlette
+apscheduler==3.10.1
+    # via inference
 blobconverter==1.4.2
     # via -r requirements.in
-boto3==1.28.52
+boto3==1.28.53
     # via blobconverter
-botocore==1.31.52
+botocore==1.31.53
     # via
     #   boto3
     #   s3transfer
-certifi==2023.7.22
-    # via requests
+certifi==2022.12.7
+    # via
+    #   requests
+    #   roboflow
+chardet==4.0.0
+    # via roboflow
 charset-normalizer==3.2.0
     # via requests
 click==8.1.7
     # via typer
+coloredlogs==15.0.1
+    # via onnxruntime
+contourpy==1.1.1
+    # via matplotlib
+cycler==0.10.0
+    # via
+    #   matplotlib
+    #   roboflow
+cython==3.0.0
+    # via inference
 defusedxml==0.7.1
     # via openvino-dev
 depthai==2.22.0.0
     # via -r requirements.in
 evdev==1.6.1
     # via pynput
-idna==3.4
-    # via requests
+exceptiongroup==1.1.3
+    # via anyio
+fastapi==0.85.1
+    # via
+    #   inference
+    #   prometheus-fastapi-instrumentator
+flatbuffers==23.5.26
+    # via onnxruntime
+fonttools==4.42.1
+    # via matplotlib
+gputil==1.4.0
+    # via inference
+humanfriendly==10.0
+    # via coloredlogs
+idna==2.10
+    # via
+    #   anyio
+    #   requests
+    #   roboflow
+inference==0.8.5
+    # via -r requirements.in
 jmespath==1.0.1
     # via
     #   boto3
     #   botocore
 jstyleson==0.0.2
     # via openvino-dev
+kiwisolver==1.4.5
+    # via
+    #   matplotlib
+    #   roboflow
 markdown-it-py==3.0.0
     # via rich
+matplotlib==3.8.0
+    # via
+    #   roboflow
+    #   supervision
 mdurl==0.1.2
     # via markdown-it-py
+mpmath==1.3.0
+    # via sympy
 networkx==3.1
     # via openvino-dev
-numpy==1.26.0
+numpy==1.25.2
     # via
+    #   contourpy
+    #   inference
+    #   matplotlib
+    #   onnxruntime
     #   opencv-python
     #   opencv-python-headless
     #   openvino
     #   openvino-dev
     #   pyvirtualcam
+    #   roboflow
     #   scipy
+    #   shapely
+    #   supervision
+onnxruntime==1.14.1
+    # via inference
 opencv-python==4.8.0.76
-    # via openvino-dev
-opencv-python-headless==4.8.0.76
-    # via -r requirements.in
+    # via
+    #   inference
+    #   openvino-dev
+opencv-python-headless==4.8.0.74
+    # via
+    #   -r requirements.in
+    #   roboflow
+    #   supervision
 openvino==2023.1.0
     # via openvino-dev
 openvino-dev==2023.1.0
@@ -60,48 +121,116 @@ openvino-telemetry==2023.1.1
     # via
     #   openvino
     #   openvino-dev
-pillow==10.0.1
-    # via openvino-dev
+packaging==23.1
+    # via
+    #   matplotlib
+    #   onnxruntime
+piexif==1.1.3
+    # via inference
+pillow==9.5.0
+    # via
+    #   inference
+    #   matplotlib
+    #   openvino-dev
+    #   roboflow
+    #   supervision
+prometheus-client==0.17.1
+    # via prometheus-fastapi-instrumentator
+prometheus-fastapi-instrumentator==6.0.0
+    # via inference
+protobuf==4.24.3
+    # via onnxruntime
+pydantic==1.10.12
+    # via fastapi
 pygments==2.16.1
     # via rich
 pynput==1.7.6
     # via -r requirements.in
+pyparsing==2.4.7
+    # via
+    #   matplotlib
+    #   roboflow
 python-dateutil==2.8.2
-    # via botocore
+    # via
+    #   botocore
+    #   matplotlib
+    #   roboflow
+python-dotenv==1.0.0
+    # via roboflow
 python-xlib==0.33
     # via pynput
+pytz==2023.3.post1
+    # via apscheduler
 pyvirtualcam==0.10.2
     # via -r requirements.in
 pyyaml==6.0.1
     # via
     #   blobconverter
     #   openvino-dev
+    #   roboflow
+    #   supervision
 requests==2.31.0
     # via
     #   blobconverter
+    #   inference
     #   openvino-dev
-rich==13.5.3
+    #   requests-toolbelt
+    #   roboflow
+requests-toolbelt==1.0.0
+    # via roboflow
+rich==13.5.2
+    # via
+    #   -r requirements.in
+    #   inference
+roboflow==1.1.7
     # via -r requirements.in
 s3transfer==0.6.2
     # via boto3
 scipy==1.10.1
-    # via openvino-dev
+    # via
+    #   openvino-dev
+    #   supervision
+shapely==2.0.1
+    # via inference
 six==1.16.0
     # via
+    #   apscheduler
+    #   cycler
     #   pynput
     #   python-dateutil
     #   python-xlib
+    #   roboflow
+sniffio==1.3.0
+    # via anyio
+starlette==0.20.4
+    # via fastapi
+supervision==0.14.0
+    # via
+    #   inference
+    #   roboflow
+sympy==1.12
+    # via onnxruntime
 texttable==1.6.7
     # via openvino-dev
 tqdm==4.66.1
-    # via openvino-dev
+    # via
+    #   openvino-dev
+    #   roboflow
 typer==0.9.0
     # via -r requirements.in
 typing-extensions==4.8.0
-    # via typer
+    # via
+    #   pydantic
+    #   typer
+tzlocal==5.0.1
+    # via apscheduler
 urllib3==1.26.16
     # via
     #   botocore
     #   requests
+    #   roboflow
 v4l2ctl==0.1a5
     # via -r requirements.in
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools
