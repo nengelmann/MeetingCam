@@ -306,7 +306,9 @@ class DepthaiDevice(DeviceHandler):
         self.available_devices_real = self.get_available_depthai()
         self.available_devices_virtual = self.get_available(real=False)
 
-    def get_available_depthai(self) -> tuple[list[str], list[str],]:
+    def get_available_depthai(
+        self,
+    ) -> tuple[list[str], list[str],]:
         """Get available depthai camera devices.
 
         Returns:
@@ -322,4 +324,3 @@ class DepthaiDevice(DeviceHandler):
             device_paths.append(device.mxid)
 
         return device_paths, labels
-
