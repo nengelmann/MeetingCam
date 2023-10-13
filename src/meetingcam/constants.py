@@ -1,6 +1,9 @@
 """Definition of constants and types"""
 
+from enum import Enum
 from typing import NewType
+
+import typer
 
 # Definition of maximum image size for virtual camera.
 # Higher resolutions are usually not supported on online meeting tools
@@ -8,7 +11,11 @@ from typing import NewType
 MAX_WIDTH = 1280
 MAX_HEIGHT = 720
 
-# Definition of plugin types (avoid spelling errors with explicit type)
+# Plugin types (avoid spelling errors with explicit type)
 PluginType = NewType("PluginType", str)
 DEPTHAI = PluginType("depthai")
 WEBCAM = PluginType("webcam")
+
+# Argument and Option types
+TYPES = Enum("DevicePath", {"all": "all", WEBCAM: WEBCAM, DEPTHAI: DEPTHAI})
+TypeArgument = typer.Option(default=WEBCAM, help=f"Choose camera type")
