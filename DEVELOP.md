@@ -11,6 +11,7 @@ python -m pip install pip-tools
 python -m pip install black
 python -m pip install isort
 python -m pip install mkdocs
+python -m pip install debugpy
 ```
 
 https://github.com/letmaik/pyvirtualcam#supported-virtual-cameras
@@ -44,15 +45,36 @@ v4l2-ctl --list-devices
 sudo modprobe v4l2loopback devices=1 video_nr=0 card_label="webcam-0"
 ```
 
-**Add a mulitple camera device.**
+**Add a multiple camera device.**
 
 ```bash
 sudo modprobe v4l2loopback devices=3 video_nr=8,9,10 card_label="webcam-1,webcam-2,webcam-3"
 ```
 
+**Debug with CLI arguments**
+```bash
+python -m debugpy --listen 5678 --wait-for-client src/meetingcam/main.py 
+```
+Then attach with this VSCode configuration:
+```json
+{
+    "name": "Python: Attach",
+    "type": "python",
+    "request": "attach",
+    "connect": {
+        "host": "localhost",
+        "port": 5678
+    }
+}
+```
+See also: https://code.visualstudio.com/docs/python/debugging
+
 ## Todos
 
 - [x] Support for depthai
+- [x] Support for roboflow
+- [ ] Use roboflow api key from env variable if available  
+- [ ] Make KeyHandler available/adjustable within plugins
 - [ ] Add Template on how to run custom models
 - [ ] Add documentation with MkDocs (https://www.mkdocs.org/) and MkDocstrings.
 - [ ] Add one more example (e.g. [Matrix-Cam](https://github.com/joschuck/matrix-webcam/blob/main/matrix_webcam)).
