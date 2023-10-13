@@ -3,12 +3,13 @@
 import re
 import signal
 import sys
+from enum import Enum
 from pathlib import Path
 from types import FrameType
-from typing import Any
+from typing import Any, Optional
 
 import depthai
-from constants import DEPTHAI, WEBCAM
+from constants import DEPTHAI, WEBCAM, PluginType
 from print import Printer
 from utils import DepthaiCapture, VideoCapture
 from v4l2ctl import V4l2Capabilities, V4l2Device
@@ -324,3 +325,25 @@ class DepthaiDevice(DeviceHandler):
             device_paths.append(device.mxid)
 
         return device_paths, labels
+
+
+def device_choice(type: PluginType) -> Enum | Optional[str]:
+    """Get default values for device paths if available"""
+    if type == WEBCAM:
+        device_handler = WebcamDevice()
+    elif type == DEPTHAI:
+        device_handler = DepthaiDevice(pipeline=None)
+    else:
+        raise ValueError(
+            f"Device type needs to be '{WEBCAM}' or '{DEPTHAI}' not '{type}'"
+        )
+
+    if device_handler.mapping:
+        devices = {
+            d["path_real"]: d["path_real"]
+            for d in device_handler.mapping.values()
+        }
+        DevicePath = Enum("DevicePath", devices)
+        return DevicePath
+    else:
+        return Optional[str]
