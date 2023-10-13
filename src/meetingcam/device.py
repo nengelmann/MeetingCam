@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-
-"""This script facilitates the management and utilization of virtual and real camera devices."""
+"""This file facilitates the management and utilization of virtual and real camera devices."""
 
 import re
 import signal
@@ -11,9 +9,7 @@ from typing import Any
 
 import depthai
 from constants import DEPTHAI, WEBCAM
-from rich.console import Console
-from rich.markdown import Markdown
-from rich.style import Style
+from print import Printer
 from utils import DepthaiCapture, VideoCapture
 from v4l2ctl import V4l2Capabilities, V4l2Device
 
@@ -43,21 +39,21 @@ class DeviceHandler:
         signal.signal(signal.SIGINT, self._interrupt)
 
         self.mapping = self.device_mapping()
-        self.pprint = DevicePrinter()
+        self.pprint = Printer()
 
     def _interrupt(self, signal: int, frame: FrameType | None) -> None:
         """Handle SIGINT signal by stopping the device and exiting the program."""
         self.pprint.device_stopped()
         sys.exit(0)
 
-    def init_device(self, device_path: str | None) -> tuple[str, str]:
-        """Initialize the device by analyzing the device path and mapping it to a real or virtual device.
+    def init_device(self, device_path: str | None) -> str:
+        """Initialize the device by analyzing the device path and mapping it a virtual device.
 
         Args:
             device_path -- the path of the device to initialize, None if not specified
 
         Returns:
-            A tuple containing paths to the real and virtual devices.
+            A a string containing the path to the virtual device.
         """
         device_map = {
             device["path_real"]: device["path_virtual"]
@@ -75,9 +71,6 @@ class DeviceHandler:
                 self.pprint.device_not_available(device_path)
                 self.pprint.available_devices(
                     self.mapping, self.available_devices_real
-                )
-                self.pprint.add_virtual_devices(
-                    self.available_devices_real, self.type
                 )
                 self.pprint.run_main_command(self.mapping, self.type)
                 sys.exit()
@@ -127,21 +120,11 @@ class DeviceHandler:
             ids_real = [
                 int(path.replace("/dev/video", "")) for path in paths_real
             ]
+
             try:
                 mapping_indices = [ids_real.index(id) for id in mapping_ids]
             except:
-                print(
-                    "The virtual cameras are not matching with attached real"
-                    " cameras. Has a camera be unplugged?\n"
-                )
-                print(
-                    "The specified virtual label is"
-                    f" {str(labels_virtual)[1:-1]}."
-                )
-                print(
-                    "May you wanted to run MeetingCam with --depthai argument?"
-                )
-                sys.exit(0)
+                mapping_indices = {}
 
         elif self.type == DEPTHAI:
             mapping_indices = []
@@ -200,7 +183,7 @@ class DeviceHandler:
         return device_paths, labels
 
     def device_running(self) -> None:
-        """Print the running devices."""
+        """Print the running device."""
         self.pprint.device_running()
 
     def _is_virtual_device(self, device: V4l2Device) -> bool:
@@ -253,7 +236,7 @@ class WebcamDevice(DeviceHandler):
         self.update_available()
         super().__init__()
 
-    def get_device(self):
+    def get_device(self) -> VideoCapture:
         """Get a VideoCapture class instance can be used for webcam image acquisition.
 
         Raises:
@@ -295,7 +278,7 @@ class DepthaiDevice(DeviceHandler):
         self.device_info = None
         self.pipeline = pipeline
 
-    def get_device(self):
+    def get_device(self) -> DepthaiCapture:
         """Get a DepthaiCapture class instance can be used for depthai image acquisition.
 
         Raises:
@@ -323,7 +306,7 @@ class DepthaiDevice(DeviceHandler):
         self.available_devices_real = self.get_available_depthai()
         self.available_devices_virtual = self.get_available(real=False)
 
-    def get_available_depthai(self) -> dict:
+    def get_available_depthai(self) -> tuple[list[str], list[str],]:
         """Get available depthai camera devices.
 
         Returns:
@@ -340,285 +323,3 @@ class DepthaiDevice(DeviceHandler):
 
         return device_paths, labels
 
-
-class DevicePrinter:
-    """Handles printing functions for device handling."""
-
-    def __init__(self) -> None:
-        """
-        Initialize the DevicePrinter instance.
-
-        Instantiates a Console object and initializes styles for different types of messages (danger, warning, ok).
-        """
-        self.console = Console()
-        self.danger_style = Style(color="red", blink=True, bold=True)
-        self.warning_style = Style(color="yellow", blink=True, bold=True)
-        self.ok_style = Style(color="green", blink=True, bold=True)
-
-    def available_devices(
-        self,
-        device_map: dict[int, dict[str, Any]],
-        available_devices_real: tuple[
-            list[str], list[str], list[int], list[str]
-        ],
-    ) -> None:
-        """
-        Print available real and virtual devices to the console.
-
-        Args:
-            device_map --- a mapping of device ids to device properties including paths and labels.
-            available_devices_real --- a tuple containing lists of paths, labels, ids, and another attribute of real devices.
-
-        The method extracts real and mapped device information and formats them for console printing.
-        """
-
-        (paths_real, labels_real) = available_devices_real
-
-        devices_real = [
-            "|" + label + "|" + str(path) + "|"
-            for label, path in zip(labels_real, paths_real)
-        ]
-        devices_real = (
-            str(devices_real).replace("'", "").replace(", ", "\n")[1:-1]
-        )
-
-        devices_mapped = [
-            "|"
-            + v["label_real"]
-            + "|"
-            + v["path_real"]
-            + " -> |"
-            + v["label_virtual"]
-            + "|"
-            + v["path_virtual"]
-            + "|"
-            for v in device_map.values()
-        ]
-        devices_mapped = (
-            str(devices_mapped).replace("'", "").replace(", ", "\n")[1:-1]
-        )
-
-        text = f"""
-        # Available devices
-        
-        | Device      | Path       |
-        |-------------|------------|
-        {devices_real}
-        
-        # Available devices with virtual counterpart
-        
-        | Device      | Path       | Virtual Device | Virtual Path |
-        |-------------|------------|----------------|--------------|
-        {devices_mapped}
-
-        """
-        self._print(text)
-
-    def add_virtual_devices(
-        self,
-        available_devices_real: tuple[list[str], list[str]],
-        type: str | int,
-    ) -> None:
-        """
-        Print instructions to add virtual devices to the console.
-
-        Args:
-            available_devices_real --- a tuple containing lists of paths, labels, ids, and another attribute of real devices.
-
-        The method extracts device labels and ids to create instructions for adding virtual devices and prints them to the console.
-        """
-        (device_paths, labels) = available_devices_real
-
-        cli_cmd_single = []
-        labels_str = []
-
-        if type == WEBCAM:
-            ids = [
-                int(path.replace("/dev/video", "")) for path in device_paths
-            ]
-            vd_nrs = ids
-            for idx, label in zip(ids, labels):
-                cli_cmd_single.append(
-                    "`sudo modprobe v4l2loopback devices=1"
-                    f" video_nr={idx} card_label='MeetingCam{idx} {label}'`"
-                )
-                labels_str.append(f"MeetingCam{idx} {label}")
-
-            labels_str = str(labels_str).replace(", ", ",")[1:-1]
-            vd_nrs = str(vd_nrs).replace(" ", "")[1:-1]
-            cli_cmd_multi = (
-                "`sudo modprobe v4l2loopback"
-                f" devices={len(ids)} video_nr={str(vd_nrs)} card_label='{labels_str[1:-1]}'`"
-            )
-        elif type == DEPTHAI:
-            ids = device_paths
-            for idx, label in zip(ids, labels):
-                cli_cmd_single.append(
-                    "`sudo modprobe v4l2loopback devices=1"
-                    f" card_label='MeetingCam{idx} {label}'`"
-                )
-                labels_str.append(f"MeetingCam{idx} {label}")
-
-            labels_str = str(labels_str).replace(", ", ",")[1:-1]
-            cli_cmd_multi = (
-                "`sudo modprobe v4l2loopback"
-                f" devices={len(ids)} card_label='{labels_str[1:-1]}'`"
-            )
-
-        else:
-            raise NotImplementedError(
-                "Device type needs to be either 'webcam' or 'depthai'."
-            )
-
-        cli_cmd_single = (
-            str(cli_cmd_single).replace(", ", "\n\n").replace('"', "")[1:-1]
-        )
-
-        self.console.print(
-            "Follow the instruction below! :arrow_down:", style=self.ok_style
-        )
-
-        text = f"""
-        # Add virtual devices
-
-        The following describes on how to add virtual devices. A virtual device is needed to publish a modified camera stream.
-        You can add a single device or multiple devices.
-        
-        ## Add a singel device
-        Add a single device by running **one** of the following commands.
-        
-        {cli_cmd_single}
-        
-        ## Add multiple devices
-        Add all your devices by running
-        
-        {cli_cmd_multi}
-        
-        You can **reset** the **virtual devices** running **`sudo modprobe -r v4l2loopback`**.
-        If this isn't working you need to restart your system.
-        """
-
-        self._print(text)
-
-    def device_not_available(self, device: V4l2Device) -> None:
-        """Print a warning message indicating the specified device is not available.
-
-        Args:
-            device (V4l2Device) --- the device that is not available.
-        """
-        text = f"""
-        **Device not available** 
-        The specified device '{device}' is not available or does not have a virtual counterpart.
-        
-        """
-        self.console.print("Warning! :warning:", style=self.warning_style)
-        self._print(text)
-
-    def used_device(self, real_path: str) -> None:
-        self.console.print("Device ready! :ok_hand:", style=self.ok_style)
-        self.console.print(
-            f"Using device on {real_path}.", style=Style(bold=True)
-        )
-        self.console.print(
-            "To use another device, specify it via command line and the"
-            " devices real path, e.g. '/dev/video0'."
-        )
-
-    def run_main_command(
-        self, device_map: dict[int, dict[str, str]], type: str | int
-    ) -> None:
-        """Print a message guiding the user to run the main command depending on the device map status.
-
-        Args:
-            device_map --- a dictionary containing the device map information.
-        """
-        if not device_map:
-            self.console.print(
-                "\nAdd a device with one of the above commands now.\n",
-                style=Style(bold=True),
-            )
-            return
-
-        elif len(device_map) == 1:
-            self.console.print(
-                "\nAlright, a device has been added. :white_check_mark:"
-            )
-
-        else:
-            ticks = (
-                str([":white_check_mark:" for i in range(len(device_map))])
-                .replace("'", "")
-                .replace(", ", " ")[1:-1]
-            )
-            self.console.print(
-                f"\nAlright, multiple devices have been added. {ticks}"
-            )
-
-        self.console.print("Now it's time to run MeetingCam!\n")
-
-        for key, device in device_map.items():
-            self.console.print(
-                f"For {device['label_real']} run:", style=Style(bold=True)
-            )
-            if type == WEBCAM:
-                self.console.print(
-                    "python src/meetingcam/main.py --device-path"
-                    f" {device['path_real']} --name YourName",
-                    style="bold cyan on black",
-                )
-            elif type == DEPTHAI:
-                self.console.print(
-                    "python src/meetingcam/main.py --device-path"
-                    f" {device['path_real']} --depthai",
-                    style="bold cyan on black",
-                )
-
-    def device_running(self) -> None:
-        """Print a message indicating that the device is currently running and how to access the stream."""
-        self.console.print(
-            "Device running! :arrow_forward:", style=self.ok_style
-        )
-        self.console.print(
-            "You can now access the modified camera stream in Meets, Teams or"
-            " Zoom. :rocket:",
-            style=Style(bold=True),
-        )
-        self.console.print(
-            "Press `Ctrl+C` to stop the running stream and access your device"
-            " normally."
-        )
-
-    def device_stopped(self) -> None:
-        """Print a message indicating that the device has stopped and can now be accessed normally."""
-        self.console.print(
-            "Device stopped. :raised_hand:", style=self.danger_style
-        )
-        self.console.print(
-            "You can access your device now as usual. MeetingCam has stopped.",
-            style=Style(bold=True),
-        )
-
-    def _print(self, text: str) -> None:
-        """Format text to markdown and print formatted text to the console.
-
-        Args:
-            text --- text to be formatted and displayed on the console.
-        """
-        text = self._reformat(text)
-        md = Markdown(text)
-        self.console.print(md)
-
-    def _reformat(self, text: str) -> str:
-        """Removes the indent spaces from indented multiline text, necessary for compatibility with the rich library's markdown format.
-
-        Args:
-            text --- the text to be reformatted.
-
-        Returns:
-            The reformatted text with removed indent spaces.
-        """
-        return text.replace("      ", "")
-
-
-if __name__ == "__main__":
-    pass
