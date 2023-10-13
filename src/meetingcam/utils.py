@@ -146,9 +146,9 @@ class KeyHandler(keyboard.GlobalHotKeys):
         }
         super().__init__(self.hotkeys)
 
-        self.f_trig: bool = False
-        self.l_trig: bool = False
-        self.n_trig: bool = False
+        self.f_trig: bool = True
+        self.l_trig: bool = True
+        self.n_trig: bool = True
         # self.x_trig: bool = False
         self.bgr2rgb_sw: bool = False
         self.mirror_sw: bool = True
