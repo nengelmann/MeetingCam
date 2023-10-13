@@ -12,32 +12,19 @@ from device import DepthaiDevice, WebcamDevice
 from plugins.plugin_utils import PluginRegistry
 from print import Printer
 
-# define typer main app and tools
 app = typer.Typer(add_completion=False)
+
 registry = PluginRegistry()
+plugin_list = registry.search_plugins()
+registry.register_plugins(app, plugin_list)
+
 printer = Printer()
 
-# register plugins
-for name in registry.plugins:
-    plugin_app = registry.import_plugin(f"plugins.{name}.main", "plugin_app")
-    help = plugin_app.info.help if type(plugin_app.info.help) is str else None
-    short_help = (
-        plugin_app.info.short_help
-        if type(plugin_app.info.short_help) is str
-        else None
-    )
-    plugin_name = (
-        plugin_app.info.name if type(plugin_app.info.help) is str else name
-    )
-    app.add_typer(
-        plugin_app, name=plugin_name, help=help, short_help=short_help
-    )
 
-
-# app entry point (main typer app)
+# app entry point of typer main app
 @app.callback(
     invoke_without_command=True,
-    epilog=Printer.epilog(),
+    epilog=printer.epilog(),
     no_args_is_help=False,
     help=(
         "AI and CV webcam utility for online meetings.\n\nRun your artificial"
@@ -48,17 +35,17 @@ for name in registry.plugins:
         "help_option_names": ["-h", "--help"],
     },
 )
-def main(ctx: typer.Context):
+def main(ctx: typer.Context) -> None:
     """
     Typer app entry point.
     Print title, subtitle or help, depending on context.
     """
     for plugin in app.registered_groups:
         if ctx.invoked_subcommand == plugin.name:
-            Printer.subtitle(plugin.name)
+            printer.subtitle(plugin.name)
 
     if ctx.invoked_subcommand is None:
-        Printer.title()
+        printer.title()
         ctx.get_help()
 
 
@@ -68,7 +55,7 @@ def main(ctx: typer.Context):
     context_settings={"help_option_names": ["-h", "--help"]},
     rich_help_panel="General-Commands",
 )
-def list_devices(type: TYPES = TypeArgument):
+def list_devices(type: TYPES = TypeArgument) -> None:
     """List all camera devices, camera paths and their virtual counter part."""
 
     type = str(type.value)
@@ -95,7 +82,7 @@ def list_devices(type: TYPES = TypeArgument):
     context_settings={"help_option_names": ["-h", "--help"]},
     rich_help_panel="General-Commands",
 )
-def add_devices(type: TYPES = TypeArgument):
+def add_devices(type: TYPES = TypeArgument) -> None:
     """List commands on how to add camera devices to be used with MeetingCam."""
 
     type = str(type.value)
@@ -155,7 +142,7 @@ def add_devices(type: TYPES = TypeArgument):
     context_settings={"help_option_names": ["-h", "--help"]},
     rich_help_panel="General-Commands",
 )
-def reset_devices():
+def reset_devices() -> None:
     """List command on how to reset the added (virtual) camera devices."""
     printer.reset_devices()
 
@@ -166,7 +153,7 @@ def reset_devices():
     rich_help_panel="General-Commands",
     hidden=True,
 )
-def create_plugin():
+def create_plugin() -> None:
     """Create a new plugin"""
     # TODO: Add a plugin creation template, to get started quickly.
     raise NotImplementedError

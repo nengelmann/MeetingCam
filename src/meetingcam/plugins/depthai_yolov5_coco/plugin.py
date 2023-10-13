@@ -1,15 +1,37 @@
-import sys
 from math import ceil
-from pathlib import Path
 from typing import Any
 
-import cv2
 import depthai
+import typer
+from constants import DEPTHAI
+from device import device_choice
 from numpy.typing import NDArray
+from runner import Runner
 
 from ..plugin_utils import PluginDepthai
 from .pipeline import PipelineHandler
 from .utils import displayFrame
+
+name = "depthai-yolov5"
+short_description = "Yolov5 (COCO) on depthai camera"
+description = """
+Yolov5 (COCO) on depthai camera.
+\nRuns a Yolov5 model trained on COCO. Computation on a depthai device."""
+
+TYPE = DEPTHAI
+DevicePath = device_choice(TYPE)
+
+plugin_txt = f"\n\n\n\nPlugin type: {TYPE}"
+
+plugin_app = typer.Typer(
+    name=name,
+    context_settings={"help_option_names": ["-h", "--help"]},
+    no_args_is_help=True,
+    short_help=short_description,
+    help=str(description + plugin_txt),
+    invoke_without_command=True,
+)
+plugin_app.type = TYPE
 
 
 class Yolov5(PluginDepthai):
@@ -81,3 +103,32 @@ class Yolov5(PluginDepthai):
         # do more host processing here..
 
         return image
+
+
+@plugin_app.callback(
+    invoke_without_command=True, rich_help_panel="Plugin-Commands"
+)
+def main(
+    device_path: DevicePath = typer.Argument(
+        default=...,
+        help="Path (mxid) to real camera device, e.g. 14442C1021C694D000 .",
+    ),
+):
+    # define plugin
+    plugin = Yolov5()
+    # define runner
+    runner = Runner(plugin, device_path)
+    print(
+        "\nThe follwoing keyboard triggers and switches are available within"
+        " this plugin:"
+    )
+    print("<ctrl>+<alt>+<l>:    Print in the detected objects.")
+    print("<ctrl>+<alt>+<r>:    Switch RGB to BGR color schema.")
+    print("<ctrl>+<alt>+<m>:    Mirror the camera stream.")
+    print("")
+    # run
+    runner.run()
+
+
+if __name__ == "__main__":
+    plugin_app()

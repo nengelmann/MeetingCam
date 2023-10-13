@@ -73,32 +73,13 @@ class DeviceHandler:
                 self.pprint.available_devices(
                     self.mapping, self.available_devices_real
                 )
-                self.pprint.run_main_command(self.mapping, self.type)
+                self.pprint.add_device_first()
                 sys.exit()
         else:
-            # device is not specified
-            if device_map:
-                # no device is specified, but a real device with virtual counterpart is available
-                # print in the available devices and point out that the first available device with virtual counterpart will be used
-                device = list(device_map.items())[0]
-                self.real_path = device[0]
-                virtual_path = device[1]
-                self.pprint.available_devices(
-                    self.mapping, self.available_devices_real
-                )
-                self.pprint.run_main_command(self.mapping, self.type)
-                sys.exit()
-            else:
-                # no device is specified and no real device with virtual counterpart is available
-                self.pprint.device_not_available(device_path)
-                self.pprint.available_devices(
-                    self.mapping, self.available_devices_real
-                )
-                self.pprint.add_virtual_devices(
-                    self.available_devices_real, self.type
-                )
-                self.pprint.run_main_command(self.mapping, self.type)
-                sys.exit()
+            raise ValueError(
+                f"Device path is {device_path}, which is not a valid device"
+                " path."
+            )
 
     def device_mapping(self) -> dict[int, dict[str, str]]:
         """Create a mapping from real camera devices to virtual camera devices.

@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import  Any
+from typing import Any
 
 import depthai
+import typer
 from constants import DEPTHAI, WEBCAM
 from numpy.typing import NDArray
 
@@ -28,7 +29,7 @@ class PluginBase(ABC):
             With this custom arguments can be passed to plugins, e.g. --name YourName
         """
         self.model_dir = "./src/meetingcam/models"
-        self.type = WEBCAM # defaults to webcam
+        self.type = WEBCAM  # defaults to webcam
 
     @abstractmethod
     def process(
@@ -90,10 +91,35 @@ class PluginDepthai(PluginBase):
 
 class PluginRegistry:
     """PluginRegistry class acts as registry for default and newly added plugins."""
-    def __init__(self):
-        self.plugins = self.register_plugins()
 
-    def register_plugins(self, path: str = "src/meetingcam/plugins") -> list:
+    def register_plugins(
+        self, main_app: typer.main.Typer, plugin_list: list
+    ) -> None:
+        """Register plugins in typer main app"""
+        for name in plugin_list:
+            plugin_app = self._import_plugin(
+                f"plugins.{name}.plugin", "plugin_app"
+            )
+            help = (
+                plugin_app.info.help
+                if type(plugin_app.info.help) is str
+                else None
+            )
+            short_help = (
+                plugin_app.info.short_help
+                if type(plugin_app.info.short_help) is str
+                else None
+            )
+            plugin_name = (
+                plugin_app.info.name
+                if type(plugin_app.info.help) is str
+                else name
+            )
+            main_app.add_typer(
+                plugin_app, name=plugin_name, help=help, short_help=short_help
+            )
+
+    def search_plugins(self, path: str = "src/meetingcam/plugins") -> list:
         """Check plugin directory for plugins and return list with found and valid plugins."""
         dirs = [d for d in Path(path).iterdir() if d.is_dir()]
         dirs = self._sortout(dirs)
@@ -124,7 +150,7 @@ class PluginRegistry:
                 dirs.remove(d)
         return dirs
 
-    def import_plugin(self, modulename, name):
+    def _import_plugin(self, modulename, name):
         """Import a named object from a module in the context of this function.
         Code adapted from: https://www.oreilly.com/library/view/python-cookbook/0596001673/ch15s04.html
         """
