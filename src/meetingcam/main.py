@@ -28,7 +28,7 @@ printer = Printer()
     no_args_is_help=False,
     help=(
         "AI and CV webcam utility for online meetings.\n\nRun your artificial"
-        " intelligence and computer vision algorithems in online meetings such"
+        " intelligence and computer vision algorithms in online meetings such"
         " as Zoom, Meets or Teams! 🪄"
     ),
     context_settings={

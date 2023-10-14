@@ -5,7 +5,7 @@ from typing import Any, Optional
 
 import cv2
 import typer
-from constants import WEBCAM
+from constants import WEBCAM, DevicePathWebcam
 from device import device_choice
 from numpy.typing import NDArray
 from runner import Runner
@@ -146,9 +146,7 @@ class FaceDetection(PluginBase):
 
 @plugin_app.callback(rich_help_panel="Plugin-Commands")
 def main(
-    device_path: DevicePath = typer.Argument(
-        default=..., help="Path to real camera device, e.g. /dev/video0."
-    ),
+    device_path: DevicePath = DevicePathWebcam,
     name: Optional[str] = typer.Option(
         default="", help="Name imprinted above the face detection."
     ),

@@ -19,3 +19,5 @@ WEBCAM = PluginType("webcam")
 # Argument and Option types
 TYPES = Enum("DevicePath", {"all": "all", WEBCAM: WEBCAM, DEPTHAI: DEPTHAI})
 TypeArgument = typer.Option(default=WEBCAM, help=f"Choose camera type")
+DevicePathWebcam = typer.Argument(default=..., help="Path to real camera device, e.g. /dev/video0.")
+DevicePathDepthai = typer.Argument(default=..., help="Path (mxid) to real camera device, e.g. 14442C1021C694D000.")

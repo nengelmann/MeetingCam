@@ -3,7 +3,7 @@ from typing import Any
 
 import depthai
 import typer
-from constants import DEPTHAI
+from constants import DEPTHAI, DevicePathDepthai
 from device import device_choice
 from numpy.typing import NDArray
 from runner import Runner
@@ -108,12 +108,7 @@ class Yolov5(PluginDepthai):
 @plugin_app.callback(
     invoke_without_command=True, rich_help_panel="Plugin-Commands"
 )
-def main(
-    device_path: DevicePath = typer.Argument(
-        default=...,
-        help="Path (mxid) to real camera device, e.g. 14442C1021C694D000 .",
-    ),
-):
+def main(device_path: DevicePath = DevicePathDepthai):
     # define plugin
     plugin = Yolov5()
     # define runner

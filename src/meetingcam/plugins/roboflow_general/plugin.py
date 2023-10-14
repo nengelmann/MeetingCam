@@ -5,7 +5,7 @@ from typing import Any, Optional
 import requests
 import supervision as sv
 import typer
-from constants import WEBCAM
+from constants import WEBCAM, DevicePathWebcam
 from device import device_choice
 from numpy.typing import NDArray
 from roboflow import Roboflow
@@ -189,9 +189,7 @@ class RoboflowDetection(PluginBase):
     invoke_without_command=True, rich_help_panel="Plugin-Commands"
 )
 def main(
-    device_path: DevicePath = typer.Argument(
-        default=..., help="Path to real camera device, e.g. /dev/video0."
-    ),
+    device_path: DevicePath = DevicePathWebcam,
     api_key: Optional[str] = typer.Option(
         default=None, help="Your private roboflow API key"
     ),
