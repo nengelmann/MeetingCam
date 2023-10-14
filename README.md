@@ -9,7 +9,8 @@
 </p>
 <hr />
 
-https://github.com/nengelmann/MeetingCam/assets/120744129/ec2e608d-e785-4179-ba33-c692da05a95b \
+https://github.com/nengelmann/MeetingCam/assets/120744129/ec2e608d-e785-4179-ba33-c692da05a95b
+
 [First-person-face-detection plugin](src/meetingcam/plugins/openvino_face_detection/README.md)
 
 ## Installation
