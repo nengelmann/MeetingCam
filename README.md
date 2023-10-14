@@ -11,7 +11,7 @@
 
 https://github.com/nengelmann/MeetingCam/assets/120744129/ec2e608d-e785-4179-ba33-c692da05a95b
 
-[First-person-face-detection](src/meetingcam/plugins/openvino_face_detection/README.md) enables you to print in your face detection and name in your webcam stream. \
+[First-person-face-detection](src/meetingcam/plugins/openvino_face_detection/README.md) prints your face detection and name in your webcam stream. \
 More plugins are listed further down the readme. 
 
 ## Installation
@@ -91,31 +91,31 @@ and in it's readme (link below 👇)
 
 You can create custom plugins. Have a look in [src/meetingcam/plugins](src/meetingcam/plugins) and see how the existing plugins are implemented.
 1. Duplicate one of the plugins directory and rename the directory.
-2. The only relevant file is 'plugin.py' in which you need to adapt the following:
+2. The only relevant file is `plugin.py` in which you need to adapt the following:
 
    - Variable: name, short_description, description
    - Variable TYPE, which can be WEBCAM (normal case) or DEPTHAI
-   - The plugin class which inherited from BasePlugin. This class needs to have an 'init' and 'process' function, for initialization and processing of a camera images respectively.
+   - The plugin class which inherited from BasePlugin. This class needs to have an `init` and `process` function, for initialization and processing of a camera images respectively.
    
       ```python
       class YourPluginClass(PluginBase):
       
-      def __init__(self, your_arg) -> None:
-         super().__init__()
-         # some more custom init, e.g. your AI model
-         self.your_arg = your_arg
-         self.model = YourModel()
+         def __init__(self, your_arg) -> None:
+            super().__init__()
+            # some more custom init, e.g. your AI model
+            self.your_arg = your_arg
+            self.model = YourModel()
 
-      def process(
-         self,
-         image: NDArray[Any],
-         detection: Any,
-         trigger: tuple[bool, bool, bool],
-      ) -> NDArray[Any]:
-         # custom image processing
-         image = self.model(image, your_arg)
-         cv2.putText(image,"That's printed in every frame!", (10,10), cv2.CV_FONT_HERSHEY_SIMPLEX, 2, 255)
-         return image
+         def process(
+            self,
+            image: NDArray[Any],
+            detection: Any,
+            trigger: tuple[bool, bool, bool],
+         ) -> NDArray[Any]:
+            # custom image processing
+            image = self.model(image, your_arg)
+            cv2.putText(image,"That's printed in every frame!", (10,10), cv2.CV_FONT_HERSHEY_SIMPLEX, 2, 255)
+            return image
       ```
    - Last step is to define your plugins entry point (typer app), simply adapt to your needs.
       ```python
@@ -154,7 +154,7 @@ Plugins can use additional triggers within their processing function. This is us
 In general most meeting tools have the restriction on camera/video resolution, mostly 720p (1270x720 pixels). Make sure to not send a virtual video stream with higher resolution. If it breaks due to resolution you can select the virtual camera in the meeting tool but it will either show "Camera failed" or a black video stream.
 
 **Chrome/Chromium Browser** \
-Chrome/Chromium might need to be ran with 'exclusive_caps=1' in the 'sudo modprobe v4l2loopback' command which is not (yet) supported by MeetingCam.
+Chrome/Chromium might need to be ran with `exclusive_caps=1` in the `sudo modprobe v4l2loopback` command which is not (yet) supported by MeetingCam.
 
 ### Tool compatibility
 
@@ -169,8 +169,8 @@ Works on Firefox.
 #### Teams 🚧
 
 There are several Problems running MeetingCam on Linux with Teams. \
-Teams, at least on Linux is just running on Chromium, Edge and it's Progressive Web App (PWA). Therefore we need to run the 'sudo modprobe v4l2loopback' command with 'exclusive_caps=1' argument, which makes troubles down the road. For some cameras this might work but is likely to fail. Even with the 'exclusive_caps=1' argument it is not reliably working. \
-A **workaround** is described [here](https://medium.com/@dan_ringwald/make-microsoft-teams-work-on-linux-with-firefox-browser-867fa0485ac). On Firefox Version 117.0.1 (snap install) it was working with the overwrite 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.74 Safari/537.36 Edg/79.0.309.43'. This overwrite might cause unwanted behaviour (including Google Meets calls are failing). So it is advisable to not add the overwrite in your main firefox profile. However you can run 'firefox -p' and create a new dedicated profile and apply the above changes. Then you can open it with 'firefox -p' or 'firefox -P PROFILE_NAME' and run it isolated.
+Teams, at least on Linux is just running on Chromium, Edge and it's Progressive Web App (PWA). Therefore we need to run the `sudo modprobe v4l2loopback` command with `exclusive_caps=1` argument, which makes troubles down the road. For some cameras this might work but is likely to fail. Even with the `exclusive_caps=1` argument it is not reliably working. \
+A **workaround** is described [here](https://medium.com/@dan_ringwald/make-microsoft-teams-work-on-linux-with-firefox-browser-867fa0485ac). On Firefox Version 117.0.1 (snap install) it was working with the overwrite `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.74 Safari/537.36 Edg/79.0.309.43`. This overwrite might cause unwanted behaviour (including Google Meets calls are failing). So it is advisable to not add the overwrite in your main firefox profile. However you can run `firefox -p` and create a new dedicated profile and apply the above changes. Then you can open it with `firefox -p` or `firefox -P PROFILE_NAME` and run it isolated.
 
 ### Camera setup info
 
@@ -195,11 +195,11 @@ Run OAK devices as uvc before normal usage of MeetingCam.
 
 #### Run OAK devices with on device compute
 
-Follow the steps in the [Usage](#Usage) section normally, just append a '--depthai' flag.
+Follow the steps in the [Usage](#Usage) section normally, just append a `--type depthai` flag to the `list-devices` and `add-devices` command and use a plugin which is of type depthai.
 
 ```bash
- source .venv/bin/activate
- python src/meetingcam/main.py --depthai
+ python src/meetingcam/main.py list-devices --type depthai
+ python src/meetingcam/main.py add-devices --type depthai
 ```
 
 ### Usage with Roboflow
