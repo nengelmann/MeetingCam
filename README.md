@@ -4,142 +4,145 @@
 </p>
 <hr />
 <p align="center">
-    AI webcam utility for online meetings. Run your AI in online Meetings such as Zoom, Meets or Teams! &#x1FA84;
-    </br> This repo is <i>work in progess</i>. The current version is a command line tool for Linux.
+    Run your AI and CV algorithms in online meetings such as Zoom, Meets or Teams! &#x1FA84;
+    </br></br>This repo is <i>work in progess</i>. The current version is a command line tool for Linux.
 </p>
 <hr />
 
-https://github.com/nengelmann/MeetingCam/assets/120744129/ec2e608d-e785-4179-ba33-c692da05a95b
+https://github.com/nengelmann/MeetingCam/assets/120744129/ec2e608d-e785-4179-ba33-c692da05a95b \
+[First-person-face-detection plugin](src/meetingcam/plugins/openvino_face_detection/README.md)
 
 ## Installation
 
-0. Clone this repo
+1. Clone this repo
 
    ```bash
    git clone https://github.com/nengelmann/MeetingCam.git && cd MeetingCam
    ```
 
-1. Install [virtualenv](https://virtualenv.pypa.io/en/stable/installation.html)
+2. Install [virtualenv](https://virtualenv.pypa.io/en/stable/installation.html)
 
-2. Create a virtual python3.10 environment
+3. Create a virtual python3.10 environment
    ```bash
    virtualenv -p /usr/bin/python3.10 .venv && source .venv/bin/activate
    ```
-3. Install the dependencies
+4. Install the dependencies
    ```bash
    python -m pip install -r requirements.txt
    ```
-4. Setup [pyvirtualcam](https://github.com/letmaik/pyvirtualcam)
+5. Setup [pyvirtualcam](https://github.com/letmaik/pyvirtualcam)
    ```bash
    sudo apt install v4l2loopback-dkms
    sudo apt install v4l-utils
    ```
-5. Download model, convert model and opt out from sending usage data
-   ```bash
-   omz_downloader --name ultra-lightweight-face-detection-rfb-320 --output_dir src/meetingcam/models
-   omz_converter --name ultra-lightweight-face-detection-rfb-320 --download_dir src/meetingcam/models --output_dir src/meetingcam/models --precision=FP16
-   opt_in_out --opt_out
-   ```
-   More about the used face detection model can be found [here](https://github.com/openvinotoolkit/open_model_zoo/blob/master/models/public/ultra-lightweight-face-detection-rfb-320/README.md).
-   A very light weight model will just work fine, due to the easy task of face detection of a person in front of a webcam.
-
 ## Usage
 
-1. Make sure your web cam is connected.
+### First add a camera device to MeetingCam
+
+To show a modified camera stream in online meetings it is necessary to create a virtual camera for each real camera you want to use.
+
+1. Make sure your webcam is connected.
 
 2. Activate the virtual environment
    ```bash
    source .venv/bin/activate
    ```
-3. Run the main.py to get custom instructions on how to create virtual cameras with your web cam. \
-   A virtual camera is needed to stream the modified camera images to your meeting tools like teams, zoom or meets.
-
+3. Run the main.py to see general commands and plugin options.
    ```bash
    python ./src/meetingcam/main.py
    ```
-
-   Don't be confused, you'll need to add your camera with another (sudo) bash command like `sudo modprobe v4l2loopback devices=1 video_nr=0 card_label="MeetingCam0"`. \
-   The main.py file will provide more info on how this command needs to be for your system/camera.
-
-4. After you added your virtual device or devices, run the main.py again.
-
+4. List available cameras
    ```bash
-   python ./src/meetingcam/main.py
+   python src/meetingcam/main.py list-devices
+   ```
+5. Get command to add a camera device
+   ```bash
+   python src/meetingcam/main.py add-devices
+   ```
+   Then **copy and execute** the **command of the camera you want to use**.
+6. You can now see that the camera of your choice has a virtual counterpart.
+   ```bash
+   python src/meetingcam/main.py list-devices
    ```
 
-   In the terminal you'll then see which command you need to run for your specific camera setup. \
-   It should look like:
+### Run a plugin
 
-   _For YOUR CAMERA DEVICE run:_ \
-   _'python src/meetingcam/main.py --device-path /dev/videoX --name YourName'_
-
-   **Enter your** camera **command** and start MeetingCam
-
-If you **restart** your system, it **will** unload the module and **undo the above device setup** \
-You can also run `sudo modprobe -r v4l2loopback` to undo the device setup.
-
-**You are** now already **running the default example**, see below for more information. ⬇️
-
-## Face Detection Example
-
-The default and current only webcam AI-Plugin is the Face Detection example.
-
-You'll run it with main.py as described under the usage section. \
-`python src/meetingcam/main.py --device-path /dev/videoX --name YourName`
-
-It will make a virtual camera available in your meeting tools. You join a meeting, select the virtual camera e.g. 'MeetingCamX CameraName'. \
-By default it will show an unmodified camera stream of your real camera.
-
-![Just you ...](./assets/example_face_detection_no_trigger.png)
-
-Let's press **<Ctrl+Alt+f>** for detection of your face!
-
-![Face Detection](./assets/example_face_detection_face_f_trigger.png)
-
-You can now show your name with **<Ctrl+Alt+n>**.
-
-![Face Detection](./assets/example_face_detection_n_+_f_trigger.png)
-
-_Actually your face is already detected the hotkey command just enables the print in of the detection._
-
-## Depthai Yolov5 Example
-
-The default and current only depthai AI-Plugin is a yolov5 model trained on the COCO dataset.
-
-You'll run it with main.py as described under the usage section. \
-`python src/meetingcam/main.py --device-path /dev/videoX --depthai`
-
-It will make an depthai OKA device as virtual camera available in your meeting tools. You join a meeting, select the virtual camera.
-By default it will show an unmodified camera stream of your real camera.
-
-<p align="center">
-<img src="./assets/example_depthai_yolov5_coco.jpg" width=40% height=40%>
-</p>
-
-Let's press **<Ctrl+Alt+l>** for unhiding the camera detections!
-
-<p align="center">
-<img src="./assets/example_depthai_yolov5_coco_with_detection.jpg" width=40% height=40%>
-</p>
-
-In this example, the neural network runs directly on the OAK camera, not on your PC.
-
-## Roboflow Example
-
-_TODO_
-e.g.:
-
+The general command to run a plugin is:
 ```bash
-python src/meetingcam/main.py --roboflow --roboflow-api-key YOUR_API_KEY --project-name meetingcam-roboflow-example-objectdetection --version 1 --device-path /dev/video0
+python src/meetingcam/main.py PLUGIN_NAME [OPTIONS] DEVICE_PATH
 ```
 
-## Switches
+e.g. the face detection plugin:
+```bash
+python src/meetingcam/main.py face-detector --name yourname /dev/video0
+```
 
-There are two switches build in. They allow you to switch the image color channel from BGR to RGB and to mirror the video stream.
-The main purpose is that if your camera is outputting an RGB stream by default you would look bluish, you can switch without modifying the code. Also the mirroring is helpful in some setups.
+Options and usage for each plugin are documented in the plugins help function \
+and in it's readme (link below 👇)
+
+## Available plugins
+- [first-person face detector](src/meetingcam/plugins/openvino_face_detection/README.md)
+- [roboflow general](src/meetingcam/plugins/roboflow_general/README.md)
+- [depthai yolov5](src/meetingcam/plugins/depthai_yolov5_coco/README.md)
+
+## Custom plugins
+
+You can create custom plugins. Have a look in [src/meetingcam/plugins](src/meetingcam/plugins) and see how the existing plugins are implemented.
+1. Duplicate one of the plugins directory and rename the directory.
+2. The only relevant file is 'plugin.py' in which you need to adapt the following:
+
+   - Variable: name, short_description, description
+   - Variable TYPE, which can be WEBCAM (normal case) or DEPTHAI
+   - The plugin class which inherited from BasePlugin. This class needs to have an 'init' and 'process' function, for initialization and processing of a camera images respectively.
+   
+      ```python
+      class YourPluginClass(PluginBase):
+      
+      def __init__(self, your_arg) -> None:
+         super().__init__()
+         # some more custom init, e.g. your AI model
+         self.your_arg = your_arg
+         self.model = YourModel()
+
+      def process(
+         self,
+         image: NDArray[Any],
+         detection: Any,
+         trigger: tuple[bool, bool, bool],
+      ) -> NDArray[Any]:
+         # custom image processing
+         image = self.model(image, your_arg)
+         cv2.putText(image,"That's printed in every frame!", (10,10), cv2.CV_FONT_HERSHEY_SIMPLEX, 2, 255)
+         return image
+      ```
+   - Last step is to define your plugins entry point (typer app), simply adapt to your needs.
+      ```python
+      @plugin_app.callback(rich_help_panel="Plugin-Commands")
+      def main(
+         device_path: DevicePath = DevicePathWebcam,
+         your_arg: Optional[str] = typer.Option(
+            default=None, help="Your custom argument."
+         ),
+      ):
+         # instantiate your plugin
+         plugin = YourPluginClass(your_arg)
+         # instantiate runner with plugin and device path
+         runner = Runner(plugin, device_path)
+         # run
+         runner.run()
+      ```
+
+There is an even easier way to setup custom plugins on the roadmap, stay tuned!
+
+## Switches and triggers
+
+There are two **switches** build in. They allow you to switch the image color channel from BGR to RGB and to mirror the video stream.
+The main purpose is, that if your camera is outputting an RGB stream by default you would look bluish, you can switch without modifying the code. Also the mirroring is helpful in some online meeting tools.
 
 **<Ctrl+Alt+r>** -> Switch color channels (RGB<>BGR). \
 **<Ctrl+Alt+m>** -> Mirror the video stream.
+
+Plugins can use additional triggers within their processing function. This is useful to hide some imprints or run the model when needed. See the plugins readmes for more information. 
 
 ## Further information
 
@@ -174,8 +177,8 @@ More information on how to setup virtual cameras can be found [here](https://wik
 ### Development and modifications
 
 You can customize this repo for your needs, you can also write your own AI-Plugin for running your models on Zoom, Teams or Meets. \
-More information about that in [DEVELOP.md](DEVELOP.md)
-Templates on how to run your custom AI will follow...
+More information about that in the section [Custom plugins](#custom-plugins) section and in [DEVELOP.md](DEVELOP.md)
+Templates and documentation on how to run your custom AI will follow.
 
 ### Usage with depthai camera
 
@@ -199,4 +202,10 @@ Follow the steps in the [Usage](#Usage) section normally, just append a '--depth
 
 ### Usage with Roboflow
 
-_TODO_
+For roboflow it is currently needed to run a roboflow inference server in a separate terminal.
+
+You can run it e.g. on CPU with the following command:
+```bash
+docker run --net=host roboflow/roboflow-inference-server-cpu:latest
+```
+See [here](https://github.com/roboflow/inference) for more options.
