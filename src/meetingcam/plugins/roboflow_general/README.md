@@ -30,14 +30,14 @@ To show a modified camera stream in online meetings it is necessary to create a 
 
 ### Run a plugin
 
-1. Currently it is needed to run a roboflow inference server in a separate terminal.
+1. Currently it is needed to run a roboflow inference server **in a separate terminal**.
 To do so, simply run the following to start an inference server (CPU).
    ```
    docker run --net=host roboflow/roboflow-inference-server-cpu:latest
    ```
    See [here](https://github.com/roboflow/inference) for more options.
 
-2. Run the plugin with replacements for `roboflow-api-key`, `project-name`, `version` and `device_path` with your camera path which has a virtual counterpart.
+2. Run the plugin with replacements for `api-key`, `project-name`, `version` and `device_path` with your camera path which has a virtual counterpart.
    ```bash
    python src/meetingcam/main.py roboflow --roboflow-api-key YOUR_API_KEY --project-name meetingcam-roboflow-example-objectdetection --version 1 --device-path /dev/video0
    ```
