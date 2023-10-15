@@ -170,7 +170,7 @@ class RoboflowDetection(PluginBase):
 
             res = response.json()
 
-            detections = sv.Detections.from_roboflow(res, self.class_list)
+            detections = sv.Detections.from_roboflow(res)
 
             if self.detection_type == "instance-segmentation":
                 image = self.annotator.annotate(
