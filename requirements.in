@@ -3,6 +3,7 @@ blobconverter
 inference
 opencv-python-headless
 openvino-dev
+pyfiglet
 pynput
 pyvirtualcam
 rich
