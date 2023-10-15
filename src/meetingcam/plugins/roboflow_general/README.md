@@ -30,7 +30,7 @@ To show a modified camera stream in online meetings it is necessary to create a 
 
 ### Run a plugin
 
-1. Currently it is needed to run a roboflow inference server every time you use this plugin.
+1. Currently it is needed to run a roboflow inference server in a separate terminal.
 To do so, simply run the following to start an inference server (CPU).
    ```
    docker run --net=host roboflow/roboflow-inference-server-cpu:latest
