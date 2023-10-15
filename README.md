@@ -11,7 +11,7 @@
 
 https://github.com/nengelmann/MeetingCam/assets/120744129/ec2e608d-e785-4179-ba33-c692da05a95b
 
-[First-person-face-detection](src/meetingcam/plugins/openvino_face_detection/README.md) prints your face detection and name in your webcam stream. \
+[First-person face detection](src/meetingcam/plugins/openvino_face_detection/README.md) prints your face detection and name in your webcam stream. \
 More plugins are listed further down the readme. 
 
 ## Installation
@@ -84,15 +84,15 @@ and in it's readme (link below 👇)
 
 ## Available plugins
 ### [**first-person face detector**](src/meetingcam/plugins/openvino_face_detection/README.md)
-[<img src="./assets/example_face_detection_n_+_f_trigger.png" height=150>](src/meetingcam/plugins/openvino_face_detection/README.md)  \
+[<img src="./assets/example_face_detection_n_+_f_trigger.png" height=100>](src/meetingcam/plugins/openvino_face_detection/README.md)  \
 Detection of first persons face and imprint of bounding box with name.
 
 ### [**roboflow general**](src/meetingcam/plugins/roboflow_general/README.md)
-[<img src="https://2486075003-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-M6S9nPJhEX9FYH6clfW%2Fuploads%2FVW4FMckhfS5GGlUcpuY2%2F642746dba53a59a614a64b35_roboflow-open-graph.png?alt=media&token=d120c000-46a4-411b-aba3-db055d48a904" height="150">](src/meetingcam/plugins/roboflow_general/README.md) \
+[<img src="https://2486075003-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-M6S9nPJhEX9FYH6clfW%2Fuploads%2FVW4FMckhfS5GGlUcpuY2%2F642746dba53a59a614a64b35_roboflow-open-graph.png?alt=media&token=d120c000-46a4-411b-aba3-db055d48a904" height="100">](src/meetingcam/plugins/roboflow_general/README.md) \
  Runs roboflow object-detection and instance-segmentation models.
 
 ### [**depthai yolov5**](src/meetingcam/plugins/depthai_yolov5_coco/README.md)
-[<img src="https://user-images.githubusercontent.com/56075061/144863247-fa819d1d-28d6-498a-89a8-c3f94d9e9357.gif" height="150">](src/meetingcam/plugins/depthai_yolov5_coco/README.md) \
+[<img src="https://user-images.githubusercontent.com/56075061/144863247-fa819d1d-28d6-498a-89a8-c3f94d9e9357.gif" height="100">](src/meetingcam/plugins/depthai_yolov5_coco/README.md) \
 Runs a Yolov5 model trained on COCO. Computation on a depthai device.
 
 ## Custom plugins
