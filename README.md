@@ -34,6 +34,7 @@ More plugins are listed further down the readme.
    ```
 5. Setup [pyvirtualcam](https://github.com/letmaik/pyvirtualcam)
    ```bash
+   sudo apt update
    sudo apt install v4l2loopback-dkms
    sudo apt install v4l-utils
    ```
