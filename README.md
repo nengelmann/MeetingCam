@@ -123,7 +123,7 @@ You can create custom plugins. Have a look in [src/meetingcam/plugins](src/meeti
          ) -> NDArray[Any]:
             # custom image processing
             image = self.model(image, your_arg)
-            cv2.putText(image,"That's printed in every frame!", (10,10), cv2.CV_FONT_HERSHEY_SIMPLEX, 2, 255)
+            cv2.putText(image,"That's printed in every frame!", (10, image.shape[0]//2), cv2.FONT_HERSHEY_SIMPLEX, 1, 255)
             return image
       ```
    - Last step is to define your plugins entry point (typer app), simply adapt to your needs.
