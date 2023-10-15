@@ -70,7 +70,7 @@ class FaceDetection(PluginBase):
 
         if not model_path.exists():
             print(
-                "\nModel files are not downloaded or converted.\n Download and"
+                "\nModel files are not downloaded or converted.\nDownload and"
                 " convert the model with the following commands."
             )
             print(
