@@ -53,13 +53,13 @@ python src/meetingcam/main.py face-detector
 
 ## Showcase
 By default the bounding box and name imprint are shown. \
-<img src="/assets/example_face_detection_n_+_f_trigger.png" height=250>
+<img src="/assets/example_face_detection_n_+_f_trigger.png" height=350>
 
 You can hide the name imprint by pressing **<Ctrl+Alt+n>**. \
-<img src="/assets/example_face_detection_face_f_trigger.png" height=250>
+<img src="/assets/example_face_detection_face_f_trigger.png" height=350>
 
 Also the bounding box can be hidden **<Ctrl+Alt+f>**. \
-<img src="/assets/example_face_detection_no_trigger.png" height=250>
+<img src="/assets/example_face_detection_no_trigger.png" height=350>
 
 
 
