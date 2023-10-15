@@ -74,9 +74,12 @@ class FaceDetection(PluginBase):
                 " convert the model with the following commands."
             )
             print(
-                "\n`omz_downloader --name ultra-lightweight-face-detection-rfb-320 --output_dir src/meetingcam/models \
-                    omz_converter --name ultra-lightweight-face-detection-rfb-320 --download_dir src/meetingcam/models --output_dir src/meetingcam/models --precision=FP16 \
-                    opt_in_out --opt_out`"
+                "\n`omz_downloader --name"
+                " ultra-lightweight-face-detection-rfb-320 --output_dir"
+                " src/meetingcam/models\nomz_converter --name"
+                " ultra-lightweight-face-detection-rfb-320 --download_dir"
+                " src/meetingcam/models --output_dir src/meetingcam/models"
+                " --precision=FP16\nopt_in_out --opt_out`"
             )
             sys.exit(0)
 
