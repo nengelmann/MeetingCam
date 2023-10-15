@@ -39,7 +39,7 @@ To do so, simply run the following to start an inference server (CPU).
 
 2. Run the plugin with replacements for `api-key`, `project-name`, `version` and `device_path` with your camera path which has a virtual counterpart.
    ```bash
-   python src/meetingcam/main.py roboflow --api-key YOUR_API_KEY --project-name meetingcam-roboflow-example-objectdetection --version 1 --device-path /dev/video0
+   python src/meetingcam/main.py roboflow --api-key YOUR_API_KEY --project-name meetingcam-roboflow-example-objectdetection --version 1 device_path
    ```
    As an alternative you can run the following and you'll be ask to enter the above replacements by terminal prompt.
    ```bash
