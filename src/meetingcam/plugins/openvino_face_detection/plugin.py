@@ -1,15 +1,41 @@
 import sys
 from math import ceil
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 import cv2
-from constants import WEBCAM
+import typer
+from constants import WEBCAM, DevicePathWebcam
+from device import device_choice
 from numpy.typing import NDArray
+from runner import Runner
 
 from ..plugin_utils import PluginBase
 from .model import FaceDetector
 from .utils import box_area, draw_bbox
+
+name = "face-detector"
+short_description = "First person face detector"
+description = """
+First person face detector.
+\nDetects the face which appears largest on the webcam (usually the users face)
+and allows to print in a bounding box as well as the name, which can be specified
+as command line argument."""
+
+TYPE = WEBCAM
+DevicePath = device_choice(TYPE)
+
+plugin_txt = f"\n\n\n\nPlugin type: {TYPE}"
+
+plugin_app = typer.Typer(
+    name=name,
+    context_settings={"help_option_names": ["-h", "--help"]},
+    no_args_is_help=True,
+    short_help=short_description,
+    help=str(description + plugin_txt),
+    invoke_without_command=True,
+)
+plugin_app.type = TYPE
 
 
 class FaceDetection(PluginBase):
@@ -44,27 +70,30 @@ class FaceDetection(PluginBase):
 
         if not model_path.exists():
             print(
-                "\nModel files are not downloaded or converted.\n Download and"
+                "\nModel files are not downloaded or converted.\nDownload and"
                 " convert the model with the following commands."
             )
             print(
                 "\n`omz_downloader --name"
                 " ultra-lightweight-face-detection-rfb-320 --output_dir"
-                " src/meetingcam/models`"
+                " src/meetingcam/models\nomz_converter --name"
+                " ultra-lightweight-face-detection-rfb-320 --download_dir"
+                " src/meetingcam/models --output_dir src/meetingcam/models"
+                " --precision=FP16\nopt_in_out --opt_out`"
             )
-            sys.exit()
+            sys.exit(0)
 
-        if name is not None:
-            self.name = name
-        else:
+        if name == "Code Ninja":
             self.name = "Code Ninja"
             print("\nYou have not specified your name ('--name' YourName).")
             print(f"I simply name you {self.name}\n")
+        else:
+            self.name = name
 
         self.detector = FaceDetector(
             model_path=model_path, confidence_thr=0.9, overlap_thr=0.7
         )
-        self.type = WEBCAM
+        self.type = TYPE
 
     def process(
         self,
@@ -116,3 +145,32 @@ class FaceDetection(PluginBase):
                     thickness=ceil(h * self.th_scale),
                 )
         return image
+
+
+@plugin_app.callback(rich_help_panel="Plugin-Commands")
+def main(
+    device_path: DevicePath = DevicePathWebcam,
+    name: Optional[str] = typer.Option(
+        default="", help="Name imprinted above the face detection."
+    ),
+):
+    # define plugin
+    if not name:
+        name = typer.prompt(
+            "A name will be imprinted above the face detection.\nWhat's your"
+            " name?"
+        )
+    plugin = FaceDetection(name)
+    # define runner
+    runner = Runner(plugin, device_path)
+    print(
+        "\nThe follwoing keyboard triggers and switches are available within"
+        " this plugin:"
+    )
+    print("<ctrl>+<alt>+<f>:    Print in the face detection.")
+    print("<ctrl>+<alt>+<n>:    Print in the name above the face detection.")
+    print("<ctrl>+<alt>+<r>:    Switch RGB to BGR color schema.")
+    print("<ctrl>+<alt>+<m>:    Mirror the camera stream.")
+    print("")
+    # run
+    runner.run()
