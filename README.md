@@ -4,7 +4,7 @@
 </p>
 <hr />
 <p align="center">
-    Run your AI and CV algorithms in online meetings such as Zoom, Meets or Teams! &#x1FA84;
+    Run your AI and CV algorithms in online meetings such as Zoom, Meets or Teams! 🚀
     </br></br>This repo is <i>work in progess</i>. The current version is a command line tool for Linux.
 </p>
 <hr />
