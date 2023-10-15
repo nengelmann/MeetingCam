@@ -1,12 +1,8 @@
 # depthai yolov5
 
-This depthai plugin is a yolov5 model trained on the COCO dataset. The model computation takes place on the depthai device.
-
 <img src="/assets/example_depthai_yolov5_coco_with_detection.jpg" height=500>
 
-https://github.com/nengelmann/MeetingCam/assets/120744129/ec2e608d-e785-4179-ba33-c692da05a95b
-
-Prints your face detection and name in your webcam stream. Possibility to hide the bounding box and name imprint.
+This depthai plugin is a yolov5 model trained on the COCO dataset. The model computation takes place on the depthai device.
 
 ## Additional installation
 
