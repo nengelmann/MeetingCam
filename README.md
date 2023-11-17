@@ -98,13 +98,29 @@ Runs a Yolov5 model trained on COCO. Computation on a depthai device.
 
 ## Custom plugins
 
-You can create custom plugins. Have a look in [src/meetingcam/plugins](src/meetingcam/plugins) and see how the existing plugins are implemented.
-1. Duplicate one of the plugins directory and rename the directory.
-2. The only relevant file is `plugin.py` in which you need to adapt the following:
+You can create custom plugins from a predefined template to kickstart your project. 🚀
 
-   - Variable: name, short_description, description
-   - Variable TYPE, which can be WEBCAM (normal case) or DEPTHAI
-   - The plugin class which inherited from BasePlugin. This class needs to have an `init` and `process` function, for initialization and processing of a camera images respectively.
+1. Create plugin from template:
+   ```bash
+   python src/meetingcam/main.py create-plugin
+   ```
+   Alternative:
+   ```bash
+   python src/meetingcam/main.py create-plugin --name your_plugin --short-description "My awesome plugin"  --description "Plugin which runs some custom AI and CV algorithms"
+   ```
+   Make sure to add quotes `"` to sentences with spaces otherwise it will be interpreted as an extra argument.
+2. Run the template to ensure the creation worked out, see [Run a plugin](#run-a-plugin)
+   ```bash
+   python src/meetingcam/main.py your_plugin /dev/your_device
+   ```
+   <img src="assets/example_custom_plugin_template.png" height="350"> \
+   You'll see an imprint if you access the camera in a meeting tool.
+3. Go to [src/meetingcam/plugins/](src/meetingcam/plugins/) and you see your plugin as a directory which contains a `plugin.py` file. \
+This file can be customized to run your CV and AI on the webcam stream! \
+It boils down to a `CustomPlugin` class where you can initialize and process the images as well as a typer main function whrere you need to adapt custom arguments. 
+
+   - `CustomPlugin` class: \
+   This class needs to have an `init` and `process` function, for initialization and processing of a camera images respectively.
    
       ```python
       class YourPluginClass(PluginBase):
@@ -126,7 +142,7 @@ You can create custom plugins. Have a look in [src/meetingcam/plugins](src/meeti
             cv2.putText(image,"That's printed in every frame!", (10, image.shape[0]//2), cv2.FONT_HERSHEY_SIMPLEX, 1, 255)
             return image
       ```
-   - Last step is to define your plugins entry point (typer app), simply adapt to your needs.
+   - Last step is to adapt your plugins entry point (typer app), if you have some arguments you want to pass via CLI.
       ```python
       @plugin_app.callback(rich_help_panel="Plugin-Commands")
       def main(
@@ -143,7 +159,6 @@ You can create custom plugins. Have a look in [src/meetingcam/plugins](src/meeti
          runner.run()
       ```
 
-There is an even easier way to setup custom plugins on the roadmap, stay tuned!
 
 ## Switches and triggers
 
