@@ -165,12 +165,10 @@ def create_plugin(
     ),
 ) -> None:
     """Create a new plugin"""
-    # check if plugin already exists
+
     if name in plugin_list:
         typer.echo(f"Plugin {name} already exists.")
         sys.exit(0)
-
-    # if arguments are not provided, ask for them
     if not name:
         name = typer.prompt("Name of new plugin")
     if not short_description:
@@ -180,11 +178,8 @@ def create_plugin(
     if not description:
         description = typer.prompt("Description of new plugin")
 
-    # create new directory for plugin
     path = Path(f"src/meetingcam/plugins/{name}")
     path.mkdir(parents=True, exist_ok=True)
-
-    # Corrected path to the template
     template_path = Path("src/meetingcam/plugins/plugin_template.py")
 
     env = Environment(loader=FileSystemLoader(template_path.parent.as_posix()))
@@ -212,18 +207,15 @@ def delete_plugin(
 ) -> None:
     """Delete a plugin"""
 
-    # check if plugin exists
     if name not in plugin_list:
         typer.echo(f"Plugin {name} does not exist.")
         sys.exit(0)
 
-    # ensure user wants to delete plugin
     confirm = typer.confirm(f"Are you sure you want to delete plugin {name}?")
     if not confirm:
         typer.echo(f"Plugin {name} not deleted.")
         sys.exit(0)
     else:
-        # delete plugin
         path = Path(f"src/meetingcam/plugins/{name}")
         shutil.rmtree(Path(f"src/meetingcam/plugins/{name}"))
         typer.echo(f"Plugin {name} deleted successfully.")
