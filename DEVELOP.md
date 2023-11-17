@@ -75,10 +75,10 @@ See also: https://code.visualstudio.com/docs/python/debugging
 - [x] Support for roboflow
 - [ ] Use roboflow api key from env variable if available  
 - [ ] Make KeyHandler available/adjustable within plugins
-- [ ] Add Template on how to run custom models
+- [x] Add Template on how to run custom models
 - [ ] Add documentation with MkDocs (https://www.mkdocs.org/) and MkDocstrings.
 - [ ] Add one more example (e.g. [Matrix-Cam](https://github.com/joschuck/matrix-webcam/blob/main/matrix_webcam)).
-- [ ] Add custom plugin instructions and template.
+- [x] Add custom plugin instructions and template.
 - [ ] Check if new and custom plugins are valid, see '_check_plugin' function in [plugin_utils.py](src/meetingcam/plugins/plugin_utils.py)
 - [ ] Add CI formatting (black, isort) checks.
 - [ ] How to run on Windows and Mac?

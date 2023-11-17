@@ -1,6 +1,7 @@
 depthai
 blobconverter
 inference
+jinja2
 opencv-python-headless
 openvino-dev
 pyfiglet

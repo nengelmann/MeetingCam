@@ -4,11 +4,14 @@
 MeetingCam allows to manage and modify video streams and route them to web meeting tools like Teams, Meets or Zoom.
 """
 
+import shutil
 import sys
+from pathlib import Path
 
 import typer
 from constants import DEPTHAI, TYPES, WEBCAM, TypeArgument
 from device import DepthaiDevice, WebcamDevice
+from jinja2 import Environment, FileSystemLoader
 from plugins.plugin_utils import PluginRegistry
 from print import Printer
 
@@ -151,12 +154,71 @@ def reset_devices() -> None:
     help="Create new plugin",
     context_settings={"help_option_names": ["-h", "--help"]},
     rich_help_panel="General-Commands",
-    hidden=True,
 )
-def create_plugin() -> None:
+def create_plugin(
+    name: str = typer.Option(default=None, help="Name of new plugin"),
+    short_description: str = typer.Option(
+        default=None, help="Short one line description of new plugin"
+    ),
+    description: str = typer.Option(
+        default=None, help="Description of new plugin"
+    ),
+) -> None:
     """Create a new plugin"""
-    # TODO: Add a plugin creation template, to get started quickly.
-    raise NotImplementedError
+
+    if name in plugin_list:
+        typer.echo(f"Plugin {name} already exists.")
+        sys.exit(0)
+    if not name:
+        name = typer.prompt("Name of new plugin")
+    if not short_description:
+        short_description = typer.prompt(
+            "Short one line description of new plugin"
+        )
+    if not description:
+        description = typer.prompt("Description of new plugin")
+
+    path = Path(f"src/meetingcam/plugins/{name}")
+    path.mkdir(parents=True, exist_ok=True)
+    template_path = Path("src/meetingcam/plugins/plugin_template.py")
+
+    env = Environment(loader=FileSystemLoader(template_path.parent.as_posix()))
+    template = env.get_template(template_path.name)
+    output = template.render(
+        name=name, short_description=short_description, description=description
+    )
+
+    with open(f"{path}/plugin.py", "w") as f:
+        f.write(output)
+
+    with open(f"{path}/__init__.py", "w") as f:
+        f.write("")
+
+    typer.echo(f"Plugin {name} created successfully.")
+
+
+@app.command(
+    help="Delete plugin",
+    context_settings={"help_option_names": ["-h", "--help"]},
+    rich_help_panel="General-Commands",
+)
+def delete_plugin(
+    name: str = typer.Option(default=None, help="Name of plugin to delete")
+) -> None:
+    """Delete a plugin"""
+
+    if name not in plugin_list:
+        typer.echo(f"Plugin {name} does not exist.")
+        sys.exit(0)
+
+    confirm = typer.confirm(f"Are you sure you want to delete plugin {name}?")
+    if not confirm:
+        typer.echo(f"Plugin {name} not deleted.")
+        sys.exit(0)
+    else:
+        path = Path(f"src/meetingcam/plugins/{name}")
+        shutil.rmtree(Path(f"src/meetingcam/plugins/{name}"))
+        typer.echo(f"Plugin {name} deleted successfully.")
 
 
 if __name__ == "__main__":
