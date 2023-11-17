@@ -117,7 +117,7 @@ You can create custom plugins from a predefined template to kickstart your proje
    You'll see an imprint if you access the camera in a meeting tool.
 3. Go to [src/meetingcam/plugins/](src/meetingcam/plugins/) and you see your plugin as a directory which contains a `plugin.py` file. \
 This file can be customized to run your CV and AI on the webcam stream! \
-It boils down to a `CustomPlugin` class where you can initialize and process the images as well as a typer main function whrere you need to adapt custom arguments. 
+It boils down to a `CustomPlugin` class where you can initialize and process the images as well as a typer main function where you need to adapt custom arguments. 
 
    - `CustomPlugin` class: \
    This class needs to have an `init` and `process` function, for initialization and processing of a camera images respectively.
