@@ -1,7 +1,7 @@
 import sys
 from math import ceil
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, Type
 
 import cv2
 import typer
@@ -9,6 +9,7 @@ from constants import WEBCAM, DevicePathWebcam
 from device import device_choice
 from numpy.typing import NDArray
 from runner import Runner
+from utils import Hotkey, KeyHandler
 
 from ..plugin_utils import PluginBase
 from .model import FaceDetector
@@ -56,6 +57,7 @@ class FaceDetection(PluginBase):
             SystemExit: If the model files are not found in the specified directory.
         """
         super().__init__()
+        self.type = TYPE
 
         self.fn_scale = 3e-3  # Adjust for larger font size in all images
         self.th_scale = 6e-3  # relative thickness in all images
@@ -93,21 +95,36 @@ class FaceDetection(PluginBase):
         self.detector = FaceDetector(
             model_path=model_path, confidence_thr=0.9, overlap_thr=0.7
         )
-        self.type = TYPE
+
+        self.hotkeys = [
+            Hotkey(
+                "<ctrl>+<alt>+f",
+                "f_trigger",
+                True,
+                "Print in the face detection.",
+            ),
+            Hotkey(
+                "<ctrl>+<alt>+n",
+                "n_trigger",
+                True,
+                "Print in the name above the face detection.",
+            ),
+        ]
+        self.verbose = True
 
     def process(
         self,
         image: NDArray[Any],
         detection: Any,
-        trigger: tuple[bool, bool, bool],
+        keyhandler: Type[KeyHandler],
     ) -> NDArray[Any]:
         """Process the input image and return the image with detected face annotations.
 
-        This method takes an image and a trigger tuple as inputs, performs face detection, and returns the image with annotations such as bounding boxes and names.
+        This method takes an image and a keyhandler as inputs, performs face detection, and returns the image with annotations such as bounding boxes and names.
 
         Args:
             image --- the input image to be processed.
-            trigger --- a tuple containing boolean values indicating whether to draw bounding boxes and name annotations.
+            keyhandler --- keyhandler instance to enable/disable functionality by hotkey trigger.
 
         Returns:
             The processed image with face and name annotations.
@@ -122,7 +139,7 @@ class FaceDetection(PluginBase):
             h, w = image.shape[0:2]
 
             # If f_trigger <Ctrl+Alt+f> is True, print in the face bbox
-            if trigger[0]:
+            if keyhandler.f_trigger:
                 image = draw_bbox(
                     image,
                     bboxes[idx][:2],
@@ -133,7 +150,7 @@ class FaceDetection(PluginBase):
                     corner_len=ceil(h * self.th_scale * 8),
                 )
             # If n_trigger <Ctrl+Alt+n> is True, print in the name above the bbox
-            if trigger[2] and self.name:
+            if keyhandler.n_trigger and self.name:
                 x1, y1 = bboxes[idx][:2]
                 image = cv2.putText(
                     image,
@@ -161,16 +178,9 @@ def main(
             " name?"
         )
     plugin = FaceDetection(name)
+
     # define runner
     runner = Runner(plugin, device_path)
-    print(
-        "\nThe follwoing keyboard triggers and switches are available within"
-        " this plugin:"
-    )
-    print("<ctrl>+<alt>+<f>:    Print in the face detection.")
-    print("<ctrl>+<alt>+<n>:    Print in the name above the face detection.")
-    print("<ctrl>+<alt>+<r>:    Switch RGB to BGR color schema.")
-    print("<ctrl>+<alt>+<m>:    Mirror the camera stream.")
-    print("")
+
     # run
     runner.run()

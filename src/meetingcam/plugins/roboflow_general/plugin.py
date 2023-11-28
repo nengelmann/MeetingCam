@@ -1,5 +1,5 @@
 import pickle
-from typing import Any, Optional
+from typing import Any, Optional, Type
 
 # from inference.models.utils import get_roboflow_model
 import requests
@@ -10,6 +10,7 @@ from device import device_choice
 from numpy.typing import NDArray
 from roboflow import Roboflow
 from runner import Runner
+from utils import Hotkey, KeyHandler
 
 from ..plugin_utils import PluginBase
 
@@ -39,16 +40,6 @@ plugin_app.type = TYPE
 class RoboflowDetection(PluginBase):
     """A plugin for running a custom roboflow model."""
 
-    """
-    def __init__(
-        self,
-        api_key: str | None = None,
-        project_name: str | None = None,
-        version: int | None = None,
-        confidence: float = 0.7,
-    ) -> None:
-    """
-
     def __init__(
         self,
         api_key: str | None = None,
@@ -68,6 +59,7 @@ class RoboflowDetection(PluginBase):
             SystemExit: If no API key is given.
         """
         super().__init__()
+        self.type = WEBCAM
 
         if not api_key:
             raise ValueError(
@@ -138,27 +130,35 @@ class RoboflowDetection(PluginBase):
         #    api_key=api_key,
         # )
 
-        self.type = WEBCAM
+        self.hotkeys = [
+            Hotkey(
+                "<ctrl>+<alt>+l",
+                "l_trigger",
+                True,
+                "Run inference and print in the detections.",
+            ),
+        ]
+        self.verbose = True
 
     def process(
         self,
         image: NDArray[Any],
         detection: Any,
-        trigger: tuple[bool, bool, bool],
+        keyhandler: Type[KeyHandler],
     ) -> NDArray[Any]:
         """Process the input image and return the image with detected face annotations.
 
-        This method takes an image and a trigger tuple as inputs, performs face detection, and returns the image with annotations such as bounding boxes and names.
+        This method takes an image and a keyhandler as inputs, performs face detection, and returns the image with annotations such as bounding boxes and names.
 
         Args:
             image --- the input image to be processed.
-            trigger --- a tuple containing boolean values indicating whether to draw bounding boxes and name annotations.
+            keyhandler --- keyhandler instance to enable/disable functionality by hotkey trigger.
 
         Returns:
             The processed image with face and name annotations.
         """
 
-        if trigger[1]:
+        if keyhandler.l_trigger:
             numpy_data = pickle.dumps(image)
 
             response = requests.post(
@@ -216,17 +216,6 @@ def main(
     plugin = RoboflowDetection(api_key, project_name, version, confidence)
     # define runner
     runner = Runner(plugin, device_path)
-    print(
-        "\nThe follwoing keyboard triggers and switches are available within"
-        " this plugin:"
-    )
-    print("<ctrl>+<alt>+<l>:    Run and print in detections.")
-    print("<ctrl>+<alt>+<r>:    Switch RGB to BGR color schema.")
-    print("<ctrl>+<alt>+<m>:    Mirror the camera stream.")
-    print("")
+
     # run
     runner.run()
-
-
-if __name__ == "__main__":
-    plugin_app()
