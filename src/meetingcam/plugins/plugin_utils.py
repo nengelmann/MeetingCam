@@ -6,6 +6,7 @@ import depthai
 import typer
 from constants import DEPTHAI, WEBCAM
 from numpy.typing import NDArray
+from utils import KeyHandler
 
 
 class PluginBase(ABC):
@@ -30,6 +31,8 @@ class PluginBase(ABC):
         """
         self.model_dir = "./src/meetingcam/models"
         self.type = WEBCAM  # defaults to webcam
+        self.hotkeys = {}
+        self.verbose = False
 
     @abstractmethod
     def process(
@@ -50,6 +53,10 @@ class PluginBase(ABC):
             The processed image.
         """
         pass
+
+    def keyhandler(self) -> KeyHandler:
+        """Return the keyhandler for this plugin."""
+        return KeyHandler(self.hotkeys, self.verbose)
 
 
 class PluginDepthai(PluginBase):
