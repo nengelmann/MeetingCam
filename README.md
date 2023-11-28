@@ -135,7 +135,7 @@ It boils down to a `CustomPlugin` class where you can initialize and process the
             self,
             image: NDArray[Any],
             detection: Any,
-            trigger: tuple[bool, bool, bool],
+            keyhandler: Type[KeyHandler],
          ) -> NDArray[Any]:
             # custom image processing
             image = self.model(image, your_arg)
@@ -160,15 +160,37 @@ It boils down to a `CustomPlugin` class where you can initialize and process the
       ```
 
 
-## Switches and triggers
+## Hotkey triggers
 
-There are two **switches** build in. They allow you to switch the image color channel from BGR to RGB and to mirror the video stream.
-The main purpose is, that if your camera is outputting an RGB stream by default you would look bluish, you can switch without modifying the code. Also the mirroring is helpful in some online meeting tools.
+There are two default **triggers** build in. They allow you to switch the image color channel from BGR to RGB and to mirror the video stream.
+The main purpose is, that if your camera is outputting an BGR stream by default you would look bluish, you can switch without modifying the code. Also the mirroring is helpful in some online meeting tools.
 
-**<Ctrl+Alt+r>** -> Switch color channels (RGB<>BGR). \
-**<Ctrl+Alt+m>** -> Mirror the video stream.
+**`<Ctrl>+<Alt>+r`** -> Switch color channels (RGB<>BGR). \
+**`<Ctrl>+<Alt>+m`** -> Mirror the video stream.
 
-Plugins can use additional triggers within their processing function. This is useful to hide some imprints or run the model when needed. See the plugins readmes for more information. 
+Plugins can use additional triggers within their processing function. This is useful to hide some imprints or run the model inference when needed.
+
+Custom hotkey triggers can be defined in the plugins main class initialization with by specifying a hotkeys list with `Hotkey(key_combination, variable_name, is_enabled, description)`.
+
+```python
+self.hotkeys = [
+            Hotkey("<Ctrl>+<Alt>+z", "z_trigger", True, "toggle something"),
+        ]
+```
+
+This trigger can be accessed during runtime in the plugins processing function as follows.
+
+```python
+# If z_trigger <Ctrl>+<Alt>+z is True, print in additional text
+if keyhandler.z_trigger:
+   image = cv2.putText(
+                image,
+                "Toggle this text with <Ctrl>+<Alt>+z",
+                (100, 100)
+   )
+```
+
+Have a look at the available [example plugins](#available-plugins) for more information or [create your own](#custom-plugins).
 
 ## Further information
 
