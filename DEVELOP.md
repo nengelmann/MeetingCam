@@ -14,8 +14,6 @@ python -m pip install mkdocs
 python -m pip install debugpy
 ```
 
-https://github.com/letmaik/pyvirtualcam#supported-virtual-cameras
-
 ## Development
 
 ### Update the requirements
@@ -74,7 +72,7 @@ See also: https://code.visualstudio.com/docs/python/debugging
 - [x] Support for depthai
 - [x] Support for roboflow
 - [ ] Use roboflow api key from env variable if available  
-- [ ] Make KeyHandler available/adjustable within plugins
+- [x] Make KeyHandler available/adjustable within plugins
 - [x] Add Template on how to run custom models
 - [ ] Add documentation with MkDocs (https://www.mkdocs.org/) and MkDocstrings.
 - [ ] Add one more example (e.g. [Matrix-Cam](https://github.com/joschuck/matrix-webcam/blob/main/matrix_webcam)).
