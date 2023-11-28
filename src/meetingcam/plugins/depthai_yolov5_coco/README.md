@@ -6,7 +6,11 @@ This depthai plugin is a yolov5 model trained on the COCO dataset. The model com
 
 ## Additional installation
 
-None.
+Make sure your udev rules are set according to depthai needs. If they are set already, skip this step.
+```bash
+echo 'SUBSYSTEM=="usb", ATTRS{idVendor}=="03e7", MODE="0666"' | sudo tee /etc/udev/rules.d/80-movidius.rules
+sudo udevadm control --reload-rules && sudo udevadm trigger
+```
 
 ## Usage
 

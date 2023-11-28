@@ -42,6 +42,18 @@ class Runner:
 
     def run(self) -> None:
         """Main loop for video frame capture and processing within MeetingCam."""
+
+        if self.plugin.verbose:
+            # print available hotkeys
+            print(
+                "\nThe following keyboard triggers and switches are available"
+                " within this plugin:"
+            )
+            for h in KeyHandler().default_hotkeys:
+                print(f"{h.hotkey}:    {h.description}")
+            for h in self.plugin.hotkeys:
+                print(f"{h.hotkey}:    {h.description}")
+            print("")
         # initialize real camera, to get frames
         with self.device_handler.get_device() as r_cam:
             # custom setup for depthai (on device handling)
@@ -55,9 +67,9 @@ class Runner:
                 fps=24,
                 device=self.virtual_path,
             ) as v_cam:
-                # initialize a keyboard listener to get and use keystroke during runtime as trigger or switch
-                with KeyHandler() as listener:
-                    listener.start()
+                # initialize a keyboard keyhandler to get and use keystroke during runtime as trigger or switch
+                with self.plugin.keyhandler() as keyhandler:
+                    keyhandler.start()
 
                     # print in command line that the pipeline is running
                     self.device_handler.device_running()
@@ -67,20 +79,16 @@ class Runner:
                         # get a frame and optionally some on camera detections
                         frame, detection = r_cam.get_frame()
 
-                        # convert bgr to rgb if <Ctrl+Alt+r> keys are pressed
-                        if listener.bgr2rgb_sw:
+                        # convert bgr to rgb if <Ctrl>+<Alt>+r keys are pressed
+                        if keyhandler.bgr2rgb:
                             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
-                        # pass trigger <Ctrl+Alt+f>, <Ctrl+Alt+l> and <Ctrl+Alt+n> for usage in plugin
-                        trigger = (
-                            listener.f_trig,
-                            listener.l_trig,
-                            listener.n_trig,
+                        frame = self.plugin.process(
+                            frame, detection, keyhandler
                         )
-                        frame = self.plugin.process(frame, detection, trigger)
 
-                        # flip image if <Ctrl+Alt+m> keys are pressed
-                        if listener.mirror_sw:
+                        # flip image if <Ctrl>+<Alt>+m keys are pressed
+                        if keyhandler.mirror:
                             frame = cv2.flip(frame, 1)
 
                         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)

@@ -211,8 +211,8 @@ class Printer:
             style=Style(bold=True),
         )
         self.console.print(
-            "Press `Ctrl+C` to stop the running stream and access your device"
-            " normally."
+            "Press `<Ctrl>+C` to stop the running stream and access your"
+            " device normally."
         )
 
     def device_stopped(self) -> None:

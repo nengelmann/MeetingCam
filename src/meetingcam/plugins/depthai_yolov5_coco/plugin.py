@@ -1,5 +1,5 @@
 from math import ceil
-from typing import Any
+from typing import Any, Type
 
 import depthai
 import typer
@@ -7,6 +7,7 @@ from constants import DEPTHAI, DevicePathDepthai
 from device import device_choice
 from numpy.typing import NDArray
 from runner import Runner
+from utils import Hotkey, KeyHandler
 
 from ..plugin_utils import PluginDepthai
 from .pipeline import PipelineHandler
@@ -40,8 +41,16 @@ class Yolov5(PluginDepthai):
     def __init__(self) -> None:
         """Initialize the base class and create depthai pipeline."""
         super().__init__()
+        self.type = TYPE
         self.pipeline_handler = PipelineHandler(self.model_dir)
         self.pipeline = self.pipeline_handler.create()
+
+        self.hotkeys = [
+            Hotkey(
+                "<ctrl>+<alt>+l", "l_trigger", True, "Print in the detections."
+            ),
+        ]
+        self.verbose = True
 
     def device_setup(self, device):
         """Setup of device before image acquisition loop, e.g. for get queue definition etc.
@@ -83,19 +92,19 @@ class Yolov5(PluginDepthai):
         self,
         image: NDArray[Any],
         detection: Any,
-        trigger: tuple[bool, bool, bool],
+        keyhandler: Type[KeyHandler],
     ) -> NDArray[Any]:
         """Process the input image and return the image with detected face annotations.
 
         Args:
             image --- the input image to be processed.
             detections --- detections from depthai device
-            trigger --- a tuple containing boolean values indicating whether to draw bounding boxes and name annotations.
+            keyhandler --- keyhandler instance to enable/disable functionality by hotkey trigger.
 
         Returns:
             The processed image with face and name annotations.
         """
-        if trigger[1]:
+        if keyhandler.l_trigger:
             image = displayFrame(
                 image, detection, self.pipeline_handler.labels
             )
@@ -113,17 +122,5 @@ def main(device_path: DevicePath = DevicePathDepthai):
     plugin = Yolov5()
     # define runner
     runner = Runner(plugin, device_path)
-    print(
-        "\nThe follwoing keyboard triggers and switches are available within"
-        " this plugin:"
-    )
-    print("<ctrl>+<alt>+<l>:    Print in the detected objects.")
-    print("<ctrl>+<alt>+<r>:    Switch RGB to BGR color schema.")
-    print("<ctrl>+<alt>+<m>:    Mirror the camera stream.")
-    print("")
     # run
     runner.run()
-
-
-if __name__ == "__main__":
-    plugin_app()

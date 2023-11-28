@@ -131,27 +131,40 @@ class DepthaiCapture(depthai.Device):
 class KeyHandler(keyboard.GlobalHotKeys):
     """A class to handle global hotkeys and their functionalities.
 
-    Inherits from keyboard.GlobalHotKeys and defines hotkey triggers and switches.
+    Inherits from keyboard.GlobalHotKeys and defines hotkey triggers.
     """
 
-    def __init__(self) -> None:
-        """Initialize the KeyHandler with hotkeys and their respective states."""
-        self.hotkeys = {
-            "<ctrl>+<alt>+f": self.f_trigger,
-            "<ctrl>+<alt>+l": self.l_trigger,
-            "<ctrl>+<alt>+n": self.n_trigger,
-            # '<ctrl>+<alt>+x':self.your_hotkey_x,
-            "<ctrl>+<alt>+r": self.bgr2rgb_switch,
-            "<ctrl>+<alt>+m": self.mirror_switch,
-        }
-        super().__init__(self.hotkeys)
+    def __init__(
+        self, plugin_hotkeys: dict[str, str] = {}, verbose=False
+    ) -> None:
+        """Initialize the KeyHandler with hotkeys and their respective states.
 
-        self.f_trig: bool = True
-        self.l_trig: bool = True
-        self.n_trig: bool = True
-        # self.x_trig: bool = False
-        self.bgr2rgb_sw: bool = False
-        self.mirror_sw: bool = True
+        Args:
+            hotkeys: A dictionary of hotkeys and their respective variable name.
+        """
+
+        self.hotkeys = {}
+        self.verbose = verbose
+
+        self.default_hotkeys = [
+            Hotkey(
+                "<ctrl>+<alt>+r",
+                "bgr2rgb",
+                False,
+                "Switch RGB to BGR color schema.",
+            ),
+            Hotkey(
+                "<ctrl>+<alt>+m", "mirror", True, "Mirror the camera stream."
+            ),
+        ]
+
+        for h in self.default_hotkeys:
+            self.add_trigger(h.hotkey, h.variable, h.enabled)
+
+        for h in plugin_hotkeys:
+            self.add_trigger(h.hotkey, h.variable, h.enabled)
+
+        super().__init__(self.hotkeys)
 
     def __enter__(self) -> Self:
         """Enter method for context management, returning self."""
@@ -161,35 +174,74 @@ class KeyHandler(keyboard.GlobalHotKeys):
         """Exit method for context management, stopping the KeyHandler."""
         self.stop()
 
-    def f_trigger(self) -> None:
-        """Toggle the state of f_trigger and print its status."""
-        self.f_trig = not self.f_trig
-        print("Keyboard trigger 1: ", str(self.f_trig))
+    def add_trigger(
+        self, hotkey: str, variable: str, enabled: bool = True
+    ) -> None:
+        """Add a new trigger function for a specific hotkey.
 
-    def l_trigger(self) -> None:
-        """Toggle the state of l_trigger and print its status."""
-        self.l_trig = not self.l_trig
-        print("Keyboard trigger 2: ", str(self.l_trig))
+        Args:
+            hotkey: The hotkey string.
+            variable: The name of the variable to toggle.
+        """
+        self.validate(hotkey, variable)
+        setattr(self, variable, enabled)
 
-    def n_trigger(self) -> None:
-        """Toggle the state of n_trigger and print its status."""
-        self.n_trig = not self.n_trig
-        print("Keyboard trigger 3: ", str(self.n_trig))
+        def trigger_func():
+            setattr(self, variable, not getattr(self, variable))
+            if self.verbose:
+                print(
+                    "Triggered: ",
+                    hotkey,
+                    " ",
+                    variable,
+                    " ",
+                    getattr(self, variable),
+                )
 
-    # def your_trigger_x(self) -> None:
-    #    """Toggle the state of custom_trigger and print its status."""
-    #    print('your hotkey is pressed')
-    #    self.x_trig = not self.x_trig
+        self.hotkeys[hotkey] = trigger_func
 
-    def bgr2rgb_switch(self) -> None:
-        """Toggle the state of bgr2rgb_switch and print its status."""
-        self.bgr2rgb_sw = not self.bgr2rgb_sw
-        print("Keyboard switch BGR2RGB: ", str(self.bgr2rgb_sw))
+    def validate(self, hotkey: str, variable: str) -> None:
+        """Check if a hotkey and variable names are valid and not existing.
 
-    def mirror_switch(self) -> None:
-        """Toggle the state of mirror_switch and print its status."""
-        self.mirror_sw = not self.mirror_sw
-        print("Keyboard switch Mirror Camera: ", str(self.mirror_sw))
+        Args:
+            hotkey: The hotkey string.
+            variable: The name of the variable to toggle."""
+        if not isinstance(hotkey, str):
+            raise ValueError(
+                "Hotkey must be a string. For example: '<Ctrl>+<Alt>+z'"
+            )
+        if not isinstance(variable, str):
+            raise ValueError(
+                "Variable must be a string. For example: 'trig_var'"
+            )
+        if variable in self.hotkeys.values():
+            raise ValueError(f"Variable name '{variable}' already exists.")
+        if hotkey in self.hotkeys.keys():
+            raise ValueError(f"Hotkey '{hotkey}' already exists.")
+
+
+class Hotkey:
+    """Hotkey data structure."""
+
+    def __init__(
+        self,
+        hotkey: str,
+        variable: str,
+        enabled: bool = True,
+        description: str = None,
+    ) -> None:
+        """Initialize the Hotkey object with a hotkey string, a variable name and a boolean value indicating whether the hotkey is enabled or not.
+
+        Args:
+            hotkey: The hotkey string.
+            variable: The name of the variable to toggle.
+            enabled: A boolean value indicating whether the hotkey is enabled or not.
+            description: A description of the hotkey.
+        """
+        self.hotkey = hotkey
+        self.variable = variable
+        self.enabled = enabled
+        self.description = description
 
 
 class InvalidArgumentError(ValueError):
