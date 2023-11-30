@@ -14,6 +14,10 @@ https://github.com/nengelmann/MeetingCam/assets/120744129/ec2e608d-e785-4179-ba3
 [First-person face detection](src/meetingcam/plugins/openvino_face_detection/README.md) prints your face detection and name in your webcam stream. \
 More plugins are listed further down the readme. 
 
+## Intro video
+
+[![Intro Video](https://img.youtube.com/vi/EkfZDEayFqM/0.jpg)](https://www.youtube.com/watch?v=EkfZDEayFqM)
+
 ## Installation
 
 1. Clone this repo
