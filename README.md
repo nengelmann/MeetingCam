@@ -1,3 +1,6 @@
+
+[![image](https://github.com/nengelmann/MeetingCam/assets/120744129/f49b189c-1e3f-4396-baff-8fd4a8633b89)](https://www.hackster.io/poseestimators/meetingcam-run-your-ai-and-cv-algorithms-in-meetings-de7bc6)
+
 <p align="center">
   <h1 align="center">MeetingCam</h1>
   <p align="center">&#x2728 Special effects for not so special meetings. &#x1F440</p>
@@ -5,7 +8,9 @@
 <hr />
 <p align="center">
     Run your AI and CV algorithms in online meetings such as Zoom, Meets or Teams! 🚀
-    </br></br>This repo is <i>work in progess</i>. The current version is a command line tool for Linux.
+</p>
+<p align="center">  
+    This Project is one of the <a href="https://www.hackster.io/poseestimators/meetingcam-run-your-ai-and-cv-algorithms-in-meetings-de7bc6">Popular Vote Finalists</a> of the OpenCV AI Competition 2023. 🎉
 </p>
 <hr />
 
